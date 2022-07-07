@@ -15,7 +15,7 @@
  - `zcat nam_unmerged_haplotypes.vcf.gz | grep "##" > nam_unmerged_haplotypes.haplines`
  - outputs `allNAM_hapids.TEbp.sup.2022-05-31.txt`
 3. `hapids_to_taxa.R` takes those hapids and tells which are present in a given RIL
- - This is all done through the PHG (maize_1_0), these are haploid mappings to all parents
+ - This is all done through the PHG (maize_1_0), these are haploid mappings of NAM RIL GBS data, run against all NAM parents
  - Info on connecting to BRAPI server here [https://bitbucket.org/bucklerlab/rphg/wiki/Home#markdown-header-brapi-access]
 
 
