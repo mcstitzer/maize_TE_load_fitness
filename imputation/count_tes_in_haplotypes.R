@@ -260,7 +260,11 @@ print(genome)
 a$nonTEbp=a$endmax+1-a$startmin-a$TEbp
 write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
-
+## when nonB73 haplotypes overlap, I can end up with negative TE bp in a region
+## will do more troubleshooting, but for now, set to NA and continue
+anona=a
+anona[anona$nonTEbp<0, 11:32]=NA
+write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 
 
