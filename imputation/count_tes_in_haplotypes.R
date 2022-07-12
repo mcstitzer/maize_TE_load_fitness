@@ -27,6 +27,9 @@ a$hapwidth=a$endmax-a$startmin
 ## switch capitalization so it works with my stuff
 a$genotype[a$genotype=='IL14H']='Il14H'
 
+## read in refrange id so that it's easy to combine with other files
+b=read.table('hapids_to_refranges.txt', comment.char='')
+a$refrange=b$refrange[match(a$hapid, b$hapid)]
 
 
 ######################################################
