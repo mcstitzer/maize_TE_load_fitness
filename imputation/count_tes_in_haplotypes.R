@@ -165,7 +165,10 @@ write.table(a, paste0('allNAM_hapids.TEbp.sup.', Sys.Date(), '.txt'), quote=F, s
 ## loop through and populate the entry of tes
 for(genome in genomes){
  ## read in EDTA TE annotation
- edtafilename=list.files(path='../genomes_and_annotations/tes/new_edta_tes/', pattern=paste0(genome, '.+', 'split.gff3.gz'), full.names=T)
+ ### filenames have different capitalization than before :( so sad
+ filegenome=genome
+ if(genome == 'Oh7B'){filegenome='Oh7b'}
+ edtafilename=list.files(path='../genomes_and_annotations/tes/new_edta_tes/', pattern=paste0(filegenome, '.+', 'split.gff3.gz'), full.names=T)
  te=import.gff(edtafilename)
  ## the new ones go B73_chr1
  seqlevels(te)=str_split_fixed(seqlevels(te), '_', 2)[,2]
@@ -207,6 +210,7 @@ for(genome in genomes){
   ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
   thro=findOverlaps(ov, haps, ignore.strand=T)
   tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+  a$TEbp[a$genotype==genome]=0
   a$TEbp[a$genotype==genome][unique(subjectHits(thro))]=tebp
 
   ### by superfamily
@@ -248,7 +252,7 @@ for(genome in genomes){
               
 
 print(genome)
-} ## running through here overnight, 3/15!!!
+} ## running through here overnight!!!
 
 a$nonTEbp=a$endmax+1-a$startmin-a$TEbp
 write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
