@@ -13,7 +13,7 @@
 2. `count_tes_in_haplotypes.R` outputs a table of each haplotype with columns for reference range ID, haplotype length, TE bp, and bp of each repeat class
  - uses the header from hvcf files to get regions for each haplotype
  - `zcat nam_unmerged_haplotypes.vcf.gz | grep "##" > nam_unmerged_haplotypes.haplines`
- - outputs `allNAM_hapids.TEbp.sup.2022-05-31.txt`
+ - outputs `allNAM_hapids.TEbp.sup.2022-05-31.txt`, also from an updated TE annotation `allNAM_hapids.TEbpUpdate.sup.2022-07-12.txt`. I'll move forward with this updated annotation
 3. `hapids_to_taxa.R` takes those hapids and tells which are present in a given RIL
  - This is all done through the PHG (maize_1_0), these are haploid mappings of NAM RIL GBS data, run against all NAM parents
  - Info on connecting to BRAPI server here [https://bitbucket.org/bucklerlab/rphg/wiki/Home#markdown-header-brapi-access]
