@@ -264,7 +264,7 @@ write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.', Sys.Date(), '.txt'), quot
 ## will do more troubleshooting, but for now, set to NA and continue
 anona=a
 anona[anona$nonTEbp<0, 11:32]=NA
-write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(anona, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 
 
