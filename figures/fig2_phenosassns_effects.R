@@ -11,7 +11,8 @@ teh=read.table('../models/geno_pheno_gphenos.2022-07-14.txt', header=T)
 
 pahDF=read.table('../models/lm_output_gphenos.2022-07-14.txt ', header=T)
 pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-07-14.txt', header=T)
-
+pahFam$effect=pahFam$gsEffect ## go back and change this in generating file in models dir
+pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## also go back and do this there
 
 pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 12,8)
 
