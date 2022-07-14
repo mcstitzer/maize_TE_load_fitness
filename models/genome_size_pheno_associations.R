@@ -122,3 +122,9 @@ pahPFDF=do.call('rbind', pahPFList)
 write.table(pahPDF, paste0('lm_output_mphenos.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 write.table(pahPFDF, paste0('lm_output_mphenos.namFamily.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
+                 
+                 
+## also write out teh and tep, to use for figures - these are the merged geno and pheno
+                 
+write.table(teh, paste0('geno_pheno_gphenos.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(tep, paste0('geno_pheno_mphenos.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
