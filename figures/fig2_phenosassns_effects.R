@@ -101,3 +101,22 @@ ggplot(pahPDF[grepl('^DTA', pahPDF$pheno) & pahPDF$geno=='tebp',], aes(x=interce
 
 dev.off()
   
+
+
+## do all the genotypes and all the phenotypes!!!
+pdf(paste0('~/transfer/ALL_phenoassns.', Sys.Date(), '.pdf'), 12,8)
+
+for(i in colnames(teh)[3:20]){
+
+dts=ggplot(teh, aes_string(x=i, y='DTS', color='subpop'))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Days to Silking (BLUE, days)') + xlab(i) 
+
+gy=ggplot(teh, aes_string(x=i, y='GY', color='subpop'))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)') + xlab(i) 
+
+ph=ggplot(teh, aes_string(x=i, y='PH', color='subpop'))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Plant Height (BLUE, cm)') + xlab(i) 
+
+genomesize=plot_grid(dts, gy, ph, ncol=3, labels='AUTO')
+print(genomesize)
+}
+dev.off()
+
+
