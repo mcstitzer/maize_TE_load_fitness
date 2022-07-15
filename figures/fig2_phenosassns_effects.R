@@ -72,4 +72,32 @@ dev.off()
 
 
 
+### add in ril inbred phenos from merritt
 
+pahPDF=read.table('../models/lm_output_pphenos.2022-07-14.txt ', header=T)
+tep=read.table('../models/geno_pheno_pphenos.2022-07-14.txt', header=T)
+
+
+pdf('~/transfer/flowering_inbreds.pdf')
+
+ggplot(pahPDF[grepl('GDD_DTS', pahPDF$pheno) & pahPDF$geno=='genomesize',], aes(x=intercept, y=gsEffect)) + ylim(700,1400) + xlim(min(tep$genomesize), max(tep$genomesize)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + geom_point() + xlab('Genome size (bp)') + ylab('DTS Diff GDD phenos')
+#  geom_abline(data=df,aes(slope=slope,intercept=intercept,color=factor(wf)))
+ggplot(pahPDF[grepl('GDD_DTA', pahPDF$pheno) & pahPDF$geno=='genomesize',], aes(x=intercept, y=gsEffect, slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + ylim(700,1400) + xlim(min(tep$genomesize), max(tep$genomesize)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05))+ geom_point() + xlab('Genome size (bp)') + ylab('DTA Diff GDD phenos')
+
+ggplot(pahPDF[grepl('GDD_DTS', pahPDF$pheno) & pahPDF$geno=='tebp',], aes(x=intercept, y=gsEffect)) + ylim(700,1400) + xlim(min(tep$tebp), max(tep$tebp)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + geom_point() + xlab('te bp (bp)') + ylab('DTS Diff GDD phenos')
+#  geom_abline(data=df,aes(slope=slope,intercept=intercept,color=factor(wf)))
+ggplot(pahPDF[grepl('GDD_DTA', pahPDF$pheno) & pahPDF$geno=='tebp',], aes(x=intercept, y=gsEffect, slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + ylim(700,1400) + xlim(min(tep$tebp), max(tep$tebp)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05))+ geom_point() + xlab('te bp (bp)') + ylab('DTA Diff GDD phenos')
+
+### nongdd
+ggplot(pahPDF[grepl('^DTS', pahPDF$pheno) & pahPDF$geno=='genomesize',], aes(x=intercept, y=gsEffect)) + ylim(60,92) + xlim(min(tep$genomesize), max(tep$genomesize)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + geom_point() + xlab('Genome size (bp)') + ylab('DTS Diff phenos') + geom_abline(data=pahDF[pahDF$geno=='genomesize' & pahDF$pheno=='DTS',], aes(intercept=intercept, slope=gsEffect), color='red')
+#  geom_abline(data=df,aes(slope=slope,intercept=intercept,color=factor(wf)))
+ggplot(pahPDF[grepl('^DTA', pahPDF$pheno) & pahPDF$geno=='genomesize',], aes(x=intercept, y=gsEffect, slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + ylim(60,92) + xlim(min(tep$genomesize), max(tep$genomesize)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05))+ geom_point() + xlab('Genome size (bp)') + ylab('DTA Diff phenos')
+
+ggplot(pahPDF[grepl('^DTS', pahPDF$pheno) & pahPDF$geno=='tebp',], aes(x=intercept, y=gsEffect)) + ylim(60,92) + xlim(min(tep$tebp), max(tep$tebp)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + geom_point() + xlab('te bp (bp)') + ylab('DTS Diff phenos')+ geom_abline(data=pahDF[pahDF$geno=='tebp' & pahDF$pheno=='DTS',], aes(intercept=intercept, slope=gsEffect), color='red')
+#  geom_abline(data=df,aes(slope=slope,intercept=intercept,color=factor(wf)))
+ggplot(pahPDF[grepl('^DTA', pahPDF$pheno) & pahPDF$geno=='tebp',], aes(x=intercept, y=gsEffect, slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05)) + ylim(60,92) + xlim(min(tep$tebp), max(tep$tebp)) + geom_abline(inherit.aes=T, aes(slope=gsEffect, intercept=intercept, color=r2, lty=pval<0.05))+ geom_point() + xlab('te bp (bp)') + ylab('DTA Diff phenos')
+
+
+
+dev.off()
+  
