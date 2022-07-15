@@ -21,7 +21,7 @@ h=read.csv('../phenotypes/BLUEs.csv')
 h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
 
 
-gs=read.table('../imputation/ril_bp_repeats.2022-07-14.txt', header=T, comment.char='')
+gs=read.table('../imputation/ril_bp_repeats.2022-07-15.txt', header=T, comment.char='')
 
 gs$namRIL=substr(gs$id,1,9)
 gs$namFamily=substr(gs$id,1,4)
@@ -101,22 +101,22 @@ runAssnP=function(genocol, famSpecific=F){ ## will return df with pheno col (all
 }
 
 ## make a df for all geno x pheno combos!
-pahList=lapply(colnames(gs)[2:(which(colnames(gs)=='namFamily')-1)], function(x) runAssnH(x))
+pahList=lapply(colnames(gs)[2:(which(colnames(gs)=='namRIL')-1)], function(x) runAssnH(x))
 pahDF=do.call('rbind', pahList)
 
 ## then repeat for family-specific!
-pahFList=lapply(colnames(gs)[2:(which(colnames(gs)=='namFamily')-1)], function(x) runAssnH(x, famSpecific=T))
+pahFList=lapply(colnames(gs)[2:(which(colnames(gs)=='namRIL')-1)], function(x) runAssnH(x, famSpecific=T))
 pahFDF=do.call('rbind', pahFList)
 
 write.table(pahDF, paste0('lm_output_gphenos.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 write.table(pahFDF, paste0('lm_output_gphenos.namFamily.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 ## continue for merritt's phenos
-pahPList=lapply(colnames(gs)[2:(which(colnames(gs)=='namFamily')-1)], function(x) runAssnP(x))
+pahPList=lapply(colnames(gs)[2:(which(colnames(gs)=='namRIL')-1)], function(x) runAssnP(x))
 pahPDF=do.call('rbind', pahPList)
 
 ## then repeat for family-specific!
-pahPFList=lapply(colnames(gs)[2:(which(colnames(gs)=='namFamily')-1)], function(x) runAssnP(x, famSpecific=T))
+pahPFList=lapply(colnames(gs)[2:(which(colnames(gs)=='namRIL')-1)], function(x) runAssnP(x, famSpecific=T))
 pahPFDF=do.call('rbind', pahPFList)
 # diff in filename is mphenos not gphenos
 write.table(pahPDF, paste0('lm_output_mphenos.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
