@@ -53,6 +53,13 @@ dim(pathMethod)
 all.haps=pathMethod
 all.haps[all.haps==-1]=NA
 
+parentsp=rPHG::graphBuilder(configFile=configPath, methods='mummer4_NAM_released_assemblies')
+parents=t(SummarizedExperiment::assays(parentsp)$hapID)
+parents[parents==-1]=NA
+#write.table(parents, 'phg_hapids_parents_dbout.txt', row.names=T, col.names=T, sep='\t', quote=F)
+#all.haps=read.table('phg_hapids_parents_dbout.txt', header=T)
+### okay, i know this is horrible, but renaming parents to all.haps here because I don't want to rewrite all fo this
+## all.haps=parents
 
 
 ## this is the values for each haplotype of how many TEs there are
@@ -184,4 +191,27 @@ rilsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(
 write.table(rilsumKeep, paste0('ril_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
                     
                     
-                    
+     parentsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T), 
+                      tebp=rowSums(temat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     nontebp=rowSums(nontemat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dhhbp=rowSums(dhhmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dtabp=rowSums(dtamat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dtcbp=rowSums(dtcmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dthbp=rowSums(dthmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dtmbp=rowSums(dtmmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     dttbp=rowSums(dttmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     rilbp=rowSums(rilmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     ritbp=rowSums(ritmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     rlcbp=rowSums(rlcmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     rlgbp=rowSums(rlgmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     rlxbp=rowSums(rlxmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     allknobbp=rowSums(allknobmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     knob180bp=rowSums(knob180mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     tr1bp=rowSums(tr1mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     centromerebp=rowSums(centromeremat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     telomerebp=rowSums(telomeremat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     ribosomalbp=rowSums(ribosomalmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
+                     b73bp=rowSums(b73mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T))
+               
+write.table(parentsumKeep, paste0('parent_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
+ 
