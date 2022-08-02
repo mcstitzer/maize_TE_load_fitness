@@ -10,7 +10,7 @@ library(plyr)
 source('../figures/color_palette.R')
 namfams=read.table('../figures/nam_fams.txt')
 
-k=read.table('../imputation/SampleToKeep.txt')
+sk=read.table('../imputation/SampleToKeep.txt')
 
 
 ## check imputation to get tecounts object... i'm being lazy
