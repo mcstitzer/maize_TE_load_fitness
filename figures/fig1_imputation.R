@@ -1,9 +1,16 @@
+library(ggplot2)
+library(cowplot)
+theme_set(theme_cowplot())
 
+## figure 1 is :
+# a) genome size vs NAM parent, ranked by parent
+# b) TE content vs NAM parent
+# c) TE content vs Genome size
+## message: we impute genome size and te content, and these are correlated but not identical
 
-                       
 source('../figures/color_palette.R')
 
-gs=read.table('../imputation/ril_bp_repeats.2022-07-14.txt', header=T, comment.char='')
+gs=read.table('../imputation/ril_bp_repeats.2022-07-15.txt', header=T, comment.char='')
 
 ## need to redo this part and it's a pain...
 parents=read.table('../imputation/nam_parents_totalbp.2022-03-28.txt', header=T)
