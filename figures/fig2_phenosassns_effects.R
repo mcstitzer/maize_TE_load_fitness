@@ -7,38 +7,76 @@ library(ggrepel)
 source('../figures/color_palette.R')
 
 
-teh=read.table('../models/geno_pheno_gphenos.2022-07-14.txt', header=T)
+teh=read.table('../models/geno_pheno_gphenos.2022-08-05.txt', header=T)
 
-pahDF=read.table('../models/lm_output_gphenos.2022-07-14.txt ', header=T)
-pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-07-14.txt', header=T)
+pahDF=read.table('../models/lm_output_gphenos.2022-08-05.txt', header=T)
+pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-08-05.txt', header=T)
 pahFam$effect=pahFam$gsEffect ## go back and change this in generating file in models dir
 pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## also go back and do this there
 
 pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 12,8)
 
-dts=ggplot(teh, aes(x=genomesize/1e9, y=DTS, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.825,1.9) + ylab('Days to Silking (BLUE, days)') + xlab('Imputed genome size (Gbp)') 
+dts=ggplot(teh, aes(x=genomesize/1e6, y=DTS, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Days to Silking (BLUE, days)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='DTS']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='DTS'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='DTS'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-gy=ggplot(teh, aes(x=genomesize/1e9, y=GY, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.825,1.9) + ylab('Grain Yield (BLUE, t/ha)') + xlab('Imputed genome size (Gbp)') 
+gy=ggplot(teh, aes(x=genomesize/1e6, y=GY, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='GY']*1e6, digits=2), '\m',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='GY'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='GY'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-ph=ggplot(teh, aes(x=genomesize/1e9, y=PH, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.825,1.9) + ylab('Plant Height (BLUE, cm)') + xlab('Imputed genome size (Gbp)') 
+gyraw=ggplot(teh, aes(x=genomesize/1e6, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#            '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='GYraw'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='GYraw'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-genomesize=plot_grid(dts, gy, ph, ncol=3, labels='AUTO')
+
+ph=ggplot(teh, aes(x=genomesize/1e6, y=PH, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Plant Height (BLUE, cm)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='PH']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='PH'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='PH'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+genomesize=plot_grid(dts, gyraw, gy, ncol=3, labels='AUTO')
                              
-dtst=ggplot(teh, aes(x=tebp/1e9, y=DTS, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.55,1.65)+ ylab('Days to Silking (BLUE, days)')+xlab('Imputed TE content (Gbp)')
+dtst=ggplot(teh, aes(x=tebp/1e6, y=DTS, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Days to Silking (BLUE, days)')+xlab('Imputed TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='DTS']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebp' & pahDF$pheno=='DTS'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='DTS'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-gyt=ggplot(teh, aes(x=tebp/1e9, y=GY, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.55,1.65)+ ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)')
+gyt=ggplot(teh, aes(x=tebp/1e6, y=GY, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')+xlab('Imputed TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GY']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebp' & pahDF$pheno=='GY'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='GY'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-pht=ggplot(teh, aes(x=tebp/1e9, y=PH, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='gray', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + xlim(1.55,1.65)+ ylab('Plant Height (BLUE, cm)')+xlab('Imputed TE content (Gbp)')
 
-tecontent=plot_grid(dtst, gyt, pht, ncol=3, labels=c('D', 'E', 'F'))
+gyrawt=ggplot(teh, aes(x=tebp/1e6, y=GY, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+pht=ggplot(teh, aes(x=tebp/1e6, y=PH, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='gray', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')+ ylab('Plant Height (BLUE, cm)')+xlab('Imputed TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='PH']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebp' & pahDF$pheno=='PH'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='PH'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+tecontent=plot_grid(dtst, gyrawt, gyt, ncol=3, labels=c('D', 'E', 'F'))
 
 plot_grid(genomesize, tecontent, ncol=1)
 
 dtsE=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS')
-gyE=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY')
-phE=ggplot(pahFam[pahFam$pheno=='PH',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on PH')
+gyE=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY corrected for DTS')
+gyrawE=ggplot(pahFam[pahFam$pheno=='GYraw',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY')
 
-effects=plot_grid(dtsE, gyE, phE, ncol=3, labels=c('G', 'H', 'I'))
+effects=plot_grid(dtsE, gyrawE, gyE, ncol=3, labels=c('G', 'H', 'I'))
 
 plot_grid(genomesize, tecontent, effects,ncol=1, rel_heights=c(1,1,0.5))
 
