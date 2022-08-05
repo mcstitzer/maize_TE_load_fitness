@@ -20,6 +20,12 @@ h=read.csv('../phenotypes/BLUEs.csv')
 
 h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
 
+hp=readRDS('../phenotypes/NAM_H-pheno.rds')
+hp$genotype=rownames(hp)
+hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
+
+## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
+h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
 
 gs=read.table('../imputation/ril_bp_repeats.2022-07-15.txt', header=T, comment.char='')
 
@@ -44,7 +50,7 @@ teh=merge(gs[gs$keep,], h[,-c(1)], by.x='namRIL', by.y='ID')
 ## function for guillaume's Hybrid phenos
 runAssnH=function(genocol, famSpecific=F){ ## will return df with pheno col (GY, PH, DTS), geno, intercept, effect, r2, pval
   if(famSpecific==F){
-  pah=data.frame(pheno=c('DTS', 'PH', 'GY'), geno=genocol)
+  pah=data.frame(pheno=c('DTS', 'PH', 'GY', 'GYraw'), geno=genocol)
   pah$intercept=sapply(pah$pheno, function(x) coef(lm(teh[,x]~teh[,genocol]))[1])
   pah$gsEffect=sapply(pah$pheno, function(x) coef(lm(teh[,x]~teh[,genocol]))[2])
   pah$r2=sapply(pah$pheno, function(x) summary(lm(teh[,x]~teh[,genocol]))$r.squared)
@@ -53,7 +59,7 @@ runAssnH=function(genocol, famSpecific=F){ ## will return df with pheno col (GY,
   }
   if(famSpecific==T){
     tmpList=lapply(unique(teh$nam), function(nam){ ## for each nam
-      pah=data.frame(pheno=c('DTS', 'PH', 'GY'), geno=genocol, nam=nam, intercept=NA, gsEffect=NA, r2=NA, pval=NA)
+      pah=data.frame(pheno=c('DTS', 'PH', 'GY', 'GYraw'), geno=genocol, nam=nam, intercept=NA, gsEffect=NA, r2=NA, pval=NA)
       for(ip in 1:nrow(pah)){ ## for each pheno
         if(sum(!is.na(teh[teh$nam==nam,pah$pheno[ip]]))>0){
           mod=lm(teh[teh$nam==nam,pah$pheno[ip]]~teh[,genocol][teh$nam==nam])
