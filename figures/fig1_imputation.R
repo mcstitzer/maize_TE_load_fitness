@@ -65,3 +65,4 @@ plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), fam
 
 
 dev.off()
+saveRDS(legend, 'subpopulation_legend.RDS')
