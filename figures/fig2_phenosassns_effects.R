@@ -14,7 +14,11 @@ pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-08-05.txt', header
 pahFam$effect=pahFam$gsEffect ## go back and change this in generating file in models dir
 pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## also go back and do this there
 
-pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 12,8)
+
+legend=readRDS('subpopulation_legend.RDS')
+
+
+pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 15,8)
 
 dts=ggplot(teh, aes(x=genomesize/1e6, y=DTS, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Days to Silking (BLUE, days)') + xlab('Imputed genome size (Mbp)') +
            annotate("text",  x=Inf, y = Inf, label = paste0(
@@ -71,6 +75,11 @@ pht=ggplot(teh, aes(x=tebp/1e6, y=PH, color=subpop)) + geom_point(alpha=0.7) + s
 tecontent=plot_grid(dtst, gyrawt, gyt, ncol=3, labels=c('D', 'E', 'F'))
 
 plot_grid(genomesize, tecontent, ncol=1)
+
+
+plot_grid(plot_grid(genomesize, tecontent, ncol=1), legend, rel_widths=c(1,0.2))
+
+
 
 dtsE=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS')
 gyE=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=effect, y=geno, col=subpop, shape=pval<0.05, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY corrected for DTS')
