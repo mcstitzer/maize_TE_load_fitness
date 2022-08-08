@@ -75,24 +75,24 @@ write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(),
 
               
 ## not all things in the TE file are TEs, so set up these categories
-#classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
-#classificationKnob=c('knob/TR-1', 'knob/knob180')
-#classificationCent=c('Cent/CentC')
-#classificationTelo=c('subtelomere/4-12-1')
-#classificationRibo=c('rDNA/spacer')
-#otherClassifications=list(classificationKnob, classificationCent, classificationTelo, classificationRibo)
-#names(otherClassifications)=c('knob', 'centromere', 'telomere', 'ribosomal')
-#
-#tesup=c("DHH", "DTA", "DTC", "DTH", "DTM", "DTT", "RIL", "RIT", "RIX", "RLC", "RLG", "RLX")
-#
-#specificRepeats=c('knob/knob180', 'knob/TR-1', 'LTR/CRM')
-#names(specificRepeats)=c('knob180', 'tr1', 'crm') ## keep separate knobs, centromeric retrotransposon annotation
-#
+classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
+classificationKnob=c('knob/TR-1', 'knob/knob180')
+classificationCent=c('Cent/CentC')
+classificationTelo=c('subtelomere/4-12-1')
+classificationRibo=c('rDNA/spacer')
+otherClassifications=list(classificationKnob, classificationCent, classificationTelo, classificationRibo)
+names(otherClassifications)=c('knob', 'centromere', 'telomere', 'ribosomal')
+
+tesup=c("DHH", "DTA", "DTC", "DTH", "DTM", "DTT", "RIL", "RIT", "RIX", "RLC", "RLG", "RLX")
+
+specificRepeats=c('knob/knob180', 'knob/TR-1', 'LTR/CRM')
+names(specificRepeats)=c('knob180', 'tr1', 'crm') ## keep separate knobs, centromeric retrotransposon annotation
+
                
                 
 ## add numeric columns for each classification category we're going to consider
                 ## here, any te family with >10mb across all genomes
-for(i in mbTEs$Name[mbTEs$bp>10000000]){
+for(i in mbTEs$Name[mbTEs$bp>10000000 & !mbTEs$Classification %in% unlist(otherClassifications)]){
   a[,paste0(i)]=0
   }
 
@@ -147,19 +147,22 @@ for(genome in genomes){
 ## Oh7B TE annotation has "oh7b" on the chromosome names... just remove that
 # if(genome=='Oh7B'){seqlevels(te)=gsub(tolower(paste0(genome, '_')), '', tolower(seqlevels(te)))}
 
+  ## make it easier on me and only keep TEs from the families I care about!!
+  te=te[te$Name %in% mbTEs$Name[mbTEs$bp>10000000],]
+          
 ## get the hapids that come from this genome
  haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
  haps$hapid=a$hapid[a$genotype==genome]
 
 
   ### by "family"
-  for(fam in mbTEs$name[mbTEs$bp>10000000]){
+  for(fam in mbTEs$Name[mbTEs$bp>10000000]){
       tehapintersect=GenomicRanges::intersect(reduce(te[te$Name==fam & !is.na(te$Name),]), haps, ignore.strand=T)
       thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
       ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
       thro=findOverlaps(ov, haps, ignore.strand=T)
       tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a[,paste0(fam)][a$genotype==genome][unique(subjectHits(thro))]=tebp
+  a[,fam][a$genotype==genome][unique(subjectHits(thro))]=tebp
 
     }      
 
@@ -167,11 +170,3 @@ print(genome)
 } ## running through here overnight!!!
 
 write.table(a, paste0('allNAM_hapids.FamiliesUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
-
-## when nonB73 haplotypes overlap, I can end up with negative TE bp in a region
-## will do more troubleshooting, but for now, set to NA and continue
-anona=a
-anona[anona$nonTEbp<0, 11:32]=NA
-write.table(anona, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
-
-
