@@ -93,13 +93,28 @@ dev.off()
 
 
 
-pdf(paste0('~/transfer/supp2_phenovpheno.', Sys.Date(), '.pdf'), 15,8)
+pdf(paste0('~/transfer/supp2_phenovpheno.', Sys.Date(), '.pdf'), 12,5)
 
-dtsgy=ggplot(teh, aes(x=DTS, y=GY, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + xlab('Days to Silking (BLUE, days)') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')
+dtsgy=ggplot(teh, aes(x=DTS, y=GY, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + xlab('Days to Silking (BLUE, days)') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(teh$GY~teh$DTS))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(teh$GY~teh$DTS))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-dtsgyraw=ggplot(teh, aes(x=DTS, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Days to Silking (BLUE, days)') 
 
-gygyraw=ggplot(teh, aes(x=GY, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)') 
+dtsgyraw=ggplot(teh, aes(x=DTS, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Days to Silking (BLUE, days)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(teh$GYraw~teh$DTS))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(teh$GYraw~teh$DTS))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+
+gygyraw=ggplot(teh, aes(x=GY, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(teh$GYraw~teh$GY))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(teh$GYraw~teh$GY))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+
 
 phenocorr=plot_grid(dtsgyraw, dtsgy, gygyraw, ncol=3, labels='AUTO')
 plot_grid(phenocorr, legend, rel_widths=c(1,0.2))
