@@ -101,12 +101,40 @@ error <- function(obs, pred){
 
 
 
-
+r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
 train=tefocus[r,-c(2:3,5)] %>% na.omit()
 dim(train)
 test=tefocus[-r,-c(2:3,5)] %>% na.omit()
 temp=predictPhenotype(train_set=train, test_set=test, method='ridge')
 cor.test(temp[,2], temp[,3])
+
+
+
+
+## try with full matrix of each repeat class
+
+sk=read.table('../imputation/SampleToKeep.txt')
+h=read.csv('../phenotypes/BLUEs.csv')
+h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
+hp=readRDS('../phenotypes/NAM_H-pheno.rds')
+hp$genotype=rownames(hp)
+hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
+## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
+h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
+
+a=readRDS('../imputation/matrixList_bpEachRefRange.RDS')
+r=sample(1:nrow(a[[1]]), nrow(a[[1]])*0.8)
+tempMat=a[[1]]
+tempMat=tempMat[rownames(tempMat) %in% sk$V1,]
+tempMat$namRIL=substr(rownames(tempMat),1,9)
+
+newMat=merge(h[,-c(1)], tempMat, by.x='ID', by.y='namRIL')
+test=cbind(data.frame(id=rownames(a[[1]])), a[[1]][r,])
+
+
+
+
+
 
 
 
@@ -144,25 +172,7 @@ foreach(sample = 1:20) %dopar% {
   message('done with sample ', sample)
 }
 
-   # transform both sets into matrices using `data.matrix`
-    x_train_mat <- data.matrix(train[, 3:ncol(train)])
-    x_test_mat  <- data.matrix(test[, 3:ncol(test)])
-    
-    # Model the matrices using glmnet
-    cv <- glmnet::cv.glmnet(
-      x      = x_train_mat,
-      y      = unlist(train[, 2]),
-      alpha  = 0,
-      nfolds = nFolds
-    )
-    #fit model with optimum lambda
-    fit <- glmnet::glmnet(
-      x      = x_train_mat,
-      y      = unlist(train[, 2]),
-      alpha  = 0,
-      lambda = cv$lambda.min, #10^seq(4, -3, length = 100), # grid
-      thresh = 1e-12
-    )
+
 
 
 pdf('~/transfer/rr_test.pdf')
