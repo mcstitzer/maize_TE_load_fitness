@@ -101,7 +101,7 @@ dtsgyraw=ggplot(teh, aes(x=DTS, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  
 
 gygyraw=ggplot(teh, aes(x=GY, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)') 
 
-phenocorr=plot_grid(dtsgy, dtsgyraw, gygyraw, ncol=3, labels='AUTO')
+phenocorr=plot_grid(dtsgyraw, dtsgy, gygyraw, ncol=3, labels='AUTO')
 plot_grid(phenocorr, legend, rel_widths=c(1,0.2))
 
 dev.off()
