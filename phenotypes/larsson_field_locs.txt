@@ -1,0 +1,5 @@
+Ames	Iowa	42.0308	93.6319
+West Lafayette	Indiana	40.4259	86.9081
+Kinston	North Carolina	35.2627	77.5816
+Columbia	Missouri	38.9517	92.3341
+Aurora	New York	42.7540	76.7024
