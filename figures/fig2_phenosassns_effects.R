@@ -91,6 +91,22 @@ plot_grid(genomesize, tecontent, effects,ncol=1, rel_heights=c(1,1,0.5))
 
 dev.off()
 
+
+
+pdf(paste0('~/transfer/supp2_phenovpheno.', Sys.Date(), '.pdf'), 15,8)
+
+dtsgy=ggplot(teh, aes(x=DTS, y=GY, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + xlab('Days to Silking (BLUE, days)') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')
+
+dtsgyraw=ggplot(teh, aes(x=DTS, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Days to Silking (BLUE, days)') 
+
+gygyraw=ggplot(teh, aes(x=GY, y=GYraw, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield (BLUE, t/ha)') + xlab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)') 
+
+phenocorr=plot_grid(dtsgy, dtsgyraw, gygyraw, ncol=3, labels='AUTO')
+plot_grid(phenocorr, legend, rel_widths=c(1,0.2))
+
+dev.off()
+
+
 pdf(paste0('~/transfer/fig3_phenoeffects.', Sys.Date(), '.pdf'), 14,3)
 
 ## or effects as separate figure, to emphasize a totally different thing b/c by family?
