@@ -22,15 +22,19 @@ atorrm=read.table('allNAM_hapids.FamiliesUpdate.sup.2022-08-09.txt', header=T, c
 matchMatrix=data.frame(lapply(1:ncol(all.haps), function(refrange) match(all.haps[,refrange], atorrm$hapid)))
 colnames(matchMatrix)=colnames(all.haps)
 
-
-famMatrices=lapply(colnames(atorrm)[13:ncol(atorrm)], function(tefam){
+### make a matrix and save separately for each!
+dir.create('TEfamily_matrices/')
+                              
+                              
+for(tefam in colnames(atorrm)[13:ncol(atorrm)]){
  tempMat=sapply(1:ncol(all.haps), function(refrange) atorrm[matchMatrix[,refrange],tefam])
  rownames(tempMat)=rownames(all.haps)
  colnames(tempMat)=colnames(all.haps)
- return(tempMat)
+ write.table(tempMat, paste0('TEfamily_matrices/',tefam, '.bp.txt'), row.names=T, col.names=T, quote=F, sep='\t')
 })
-names(famMatrices)=colnames(atorrm)[13:ncol(atorrm)]
+#names(famMatrices)=colnames(atorrm)[13:ncol(atorrm)]
 #### wowowowow this might actually work!!!!
+ ## lol saving in an array took 500 Gb so I changed to save each to disk separately :)
 
 
                     
