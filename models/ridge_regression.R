@@ -123,13 +123,24 @@ hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
 h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
 
 a=readRDS('../imputation/matrixList_bpEachRefRange.RDS')
-r=sample(1:nrow(a[[1]]), nrow(a[[1]])*0.8)
 tempMat=a[[1]]
-tempMat=tempMat[rownames(tempMat) %in% sk$V1,]
+tempMat=data.frame(tempMat[rownames(tempMat) %in% sk$V1,])
 tempMat$namRIL=substr(rownames(tempMat),1,9)
 
 newMat=merge(h[,-c(1)], tempMat, by.x='ID', by.y='namRIL')
-test=cbind(data.frame(id=rownames(a[[1]])), a[[1]][r,])
+             
+## oh dang i've got a lot of missing data... mean impute (should fix to mean of two parents!)
+for(i in 6:ncol(newMat)){
+  newMat[is.na(newMat[,i]), i] <- mean(newMat[,i], na.rm = TRUE)
+}
+
+r=sample(1:nrow(newMat), nrow(newMat)*0.8)
+
+train=newMat[r,-c(2:3,5)] %>% na.omit()
+dim(train)
+test=newMat[-r,-c(2:3,5)] %>% na.omit()
+temp=predictPhenotype(train_set=train, test_set=test, method='ridge')
+cor.test(temp[,2], temp[,3])
 
 
 
