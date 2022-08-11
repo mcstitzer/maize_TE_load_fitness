@@ -77,3 +77,64 @@ plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), fam
 
 dev.off()
 saveRDS(legend, 'subpopulation_legend.RDS')
+
+
+## supplement 1 is validation of genome size vs flow cyt
+## compare parent imputed length to flow cytometry to pick which is best
+fc=read.table('../imputation/maize_flow_cytometry_chia.txt', header=T, sep='\t')
+fc$genomesize=parents$genomesize[match(toupper(fc$line), toupper(c('B73', parents$nam[-1])))]
+fc$tebp=parents$tebp[match(toupper(fc$line), toupper(c('B73', parents$nam[-1])))]
+
+fc$subpop=nam$subpop[match(toupper(fc$line), toupper(nam$genome))]
+fc$subpop[fc$subpop=='B73']=NA
+## remove the tils and non-nam things
+fc=fc[!is.na(fc$bp_in_assembly),]
+
+cor.test(fc$assembly10chr, fc$standardized.genome.size, use='complete', method='spearman')
+cor.test(fc$bp_in_assembly, fc$standardized.genome.size, use='complete', method='spearman')
+cor.test(fc$genomesize, fc$standardized.genome.size, use='complete', method='spearman')
+cor.test(fc$tebp, fc$standardized.genome.size, use='complete', method='spearman')
+
+pdf(paste0('~/transfer/supp1_flow_cytometry_comparison.', Sys.Date(), '.pdf'),10,10)
+assembly=ggplot(fc, aes(x=bp_in_assembly/1e6, y=standardized.genome.size, label=line, color=subpop)) + geom_text() + ylab('Flow cytometry (standardized to B73)')+xlab('Genome Assembly (Mb)')+ scale_color_manual(values=nampal, name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$standardized.genome.size~fc$bp_in_assembly))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$standardized.genome.size~fc$bp_in_assembly))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+imputedgs=ggplot(fc, aes(x=genomesize/1e6, y=standardized.genome.size, label=line, color=subpop)) + geom_text()+ ylab('Flow cytometry (standardized to B73)')+ xlab('Imputed Genome Size (Mb)')+scale_color_manual(values=nampal, name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$standardized.genome.size~fc$genomesize))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$standardized.genome.size~fc$genomesize))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+imputedte=ggplot(fc, aes(x=tebp/1e6, y=standardized.genome.size, label=line, color=subpop)) + geom_text()+ ylab('Flow cytometry (standardized to B73)')+ xlab('Imputed TE Content (Mb)')+scale_color_manual(values=nampal, name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$standardized.genome.size~fc$tebp))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$standardized.genome.size~fc$tebp))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+
+imputedgsnice=ggplot(fc, aes(x=genomesize/1e6, y=standardized.genome.size, label=line, color=subpop))+ geom_errorbar(aes(ymin=standardized.genome.size-SE, ymax=standardized.genome.size+SE), width=.1, color='gray') + geom_text()+ ylab('Flow cytometry (standardized to B73)') +xlab('Imputed Genome Size (Mb)')+ scale_color_manual(values=c(nampal[1:5], 'gray'), name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$standardized.genome.size~fc$genomesize))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$standardized.genome.size~fc$genomesize))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+assemblynice=ggplot(fc, aes(x=bp_in_assembly/1e6, y=standardized.genome.size, label=line, color=subpop))+ geom_errorbar(aes(ymin=standardized.genome.size-SE, ymax=standardized.genome.size+SE), width=.1, color='gray') + geom_text()+ ylab('Flow cytometry (standardized to B73)') +xlab('Genome Assembly (Mb)')+ scale_color_manual(values=c(nampal[1:5], 'gray'), name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$standardized.genome.size~fc$bp_in_assembly))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$standardized.genome.size~fc$bp_in_assembly))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+assemblyvgs=ggplot(fc, aes(x=bp_in_assembly/1e6, y=genomesize/1e6, label=line, color=subpop))+ geom_text()+ ylab('Imputed Genome Size (Mb)') +xlab('Genome Assembly (Mb)')+ scale_color_manual(values=nampal, name='Subpopulation', na.translate=F)+ stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8)+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(summary(lm(fc$genomesize~fc$bp_in_assembly))$r.squared, digits=2), 
+             '\np = ', signif(summary(lm(fc$genomesize~fc$bp_in_assembly))$coefficients[2,4], digits=2)), vjust=1, hjust=1, color='#99195E')
+#plot_grid(plot_grid(assemblynice + theme(legend.position='NULL'), imputedgsnice + theme(legend.position='NULL'), assemblyvgs + theme(legend.position='NULL'), labels='AUTO', nrow=3), legend, rel_widths=c(1,0.2))
+ plot_grid(plot_grid(assemblynice + theme(legend.position='NULL'), imputedgsnice + theme(legend.position='NULL'), labels='AUTO', nrow=2), legend, rel_widths=c(1,0.2))
+       
+dev.off()
+
+
+
+
