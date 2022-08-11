@@ -142,10 +142,35 @@ test=newMat[-r,-c(2:3,5)] %>% na.omit()
 temp=predictPhenotype(train_set=train, test_set=test, method='ridge')
 cor.test(temp[,2], temp[,3])
 
+## just run fit function from above because i want the model to get coefficients!!!
+
+library(broom)
+
+rr=read.table('../imputation/maize1_reference_ranges.csv', header=T, sep=',')
+head(rr)
+rr$genic=ifelse(rr$name=='FocusRegion', T, F)
 
 
+b=broom::tidy(fit)
+head(b)
+b$genic=rr$genic[match(b$term, paste0('X', rr$ref_range_id))]
+
+rr$estimate=b$estimate[match(paste0('X', rr$ref_range_id), b$term)]
 
 
+pdf('~/transfer/ridgeregression_gs.pdf', 14,6)
+ggplot(rr, aes(x=range_start, y=estimate)) + geom_point() + facet_wrap(~chrom, ncol=10)
+ggplot(rr[rr$ref_range_id!=40979,], aes(x=range_start, y=estimate)) + geom_point() + facet_wrap(~chrom, ncol=10)
+dev.off()
+sum(rr$estimate>0)
+sum(rr$estimate>0, na.rm=T)
+sum(rr$estimate<0, na.rm=T)
+sum(rr$estimate==0, na.rm=T)
+sum(rr$estimate<0, na.rm=T)
+sum(rr$estimate[rr$genic]<0, na.rm=T)
+sum(rr$estimate[!rr$genic]<0, na.rm=T)
+sum(rr$estimate[!rr$genic]>0, na.rm=T)
+sum(rr$estimate[rr$genic]>0, na.rm=T)
 
 
 
