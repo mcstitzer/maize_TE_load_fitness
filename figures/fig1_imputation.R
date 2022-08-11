@@ -46,7 +46,7 @@ parents$subpop[parents$subpop=='B73']=NA
 
 ## minmax range of GSminmax, TEminmax
 GSminmax=c(min(c(gs$genomesize, parents$genomesize)), max(c(gs$genomesize, parents$genomesize)))/1e6
-TEminmax=c(min(c(gs$tebp, parents$tebp)), max(c(gs$tebp, parents$tebp)))/1e6
+TEminmax=c(min(c(gs$tebp, parents$tebp)), max(c(gs$tebp, parents$tebp))+25*1e6)/1e6 ## bump up te max so that labels don't overlap??
 
 pdf(paste0('~/transfer/fig1_imputation.', Sys.Date(), '.pdf'), 10,9)
 famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
@@ -56,16 +56,17 @@ famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_ma
                              geom_point() +
                              geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
                              geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
-                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.3, nudge_x=-0.5, show.legend=F) + 
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
                              ylab('Imputed TE Content (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
                              scale_x_continuous(n.breaks=4, limits=GSminmax) +
                              theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='left', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
-                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 3, limits=TEminmax)
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
 
                              
-genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Gbp)') + ylab('NAM Family') + 
+genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Mbp)') + ylab('NAM Family') + 
                 geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL')
-tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Gbp)') + ylab('NAM Family') + 
+tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
                 geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
 
 legend <- get_legend(famTE)
