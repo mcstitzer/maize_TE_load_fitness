@@ -33,6 +33,7 @@ predictPhenotype <- function(train_set, ## columns got to be: 1=sample name, 2=p
                                              test_set,
                                              method = c("ridge", "LASSO"),
                                              nFolds = 10,
+                                             returnModel=F,
                                              ...) {
   method <- method[1]
   
@@ -45,8 +46,8 @@ predictPhenotype <- function(train_set, ## columns got to be: 1=sample name, 2=p
 #   test <- test_set[, ..common_x] %>% na.omit()
     
     # transform both sets into matrices using `data.matrix`
-    x_train_mat <- data.matrix(train[, 3:ncol(train)])
-    x_test_mat  <- data.matrix(test[, 3:ncol(test)])
+    x_train_mat <- data.matrix(train_set[, 3:ncol(train_set)])
+    x_test_mat  <- data.matrix(test_set[, 3:ncol(test_set)])
     
     # Model the matrices using glmnet
     cv <- glmnet::cv.glmnet(
@@ -75,13 +76,17 @@ predictPhenotype <- function(train_set, ## columns got to be: 1=sample name, 2=p
   }
   
   # Phenotype class / data frame example
+  if(!returnModel){
    return(
      data.frame(
        name = test[,1],
        predicted = pred,
        observed = test[,2]
      )
-   )
+     )
+     }else{
+       return(fit)
+       }
 }
 
 
@@ -99,14 +104,46 @@ error <- function(obs, pred){
 
 #loop starts here
 
+rr=read.table('../imputation/maize1_reference_ranges.csv', header=T, sep=',')
+head(rr)
+rr$genic=ifelse(rr$name=='FocusRegion', T, F)
 
 
 r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
-train=tefocus[r,-c(2:3,5)] %>% na.omit()
+train=tefocus[r,] %>% na.omit()
 dim(train)
-test=tefocus[-r,-c(2:3,5)] %>% na.omit()
-temp=predictPhenotype(train_set=train, test_set=test, method='ridge')
-cor.test(temp[,2], temp[,3])
+test=tefocus[-r,] %>% na.omit()
+tefocusDTS=predictPhenotype(train_set=train[,-c(3:5)], test_set=test[,-c(3:5)], method='ridge', returnModel=T)
+#cor.test(temp[,2], temp[,3])
+tefocusGY=predictPhenotype(train_set=train[,-c(2:3,5)], test_set=test[,-c(2:3,5)], method='ridge', returnModel=T)
+tefocusGYraw=predictPhenotype(train_set=train[,-c(2:4)], test_set=test[,-c(2:4)], method='ridge', returnModel=T)
+
+
+b=broom::tidy(tefocusDTS)
+b=broom::tidy(tefocusGY)
+b=broom::tidy(tefocusGYraw)
+
+tefocusRR=data.frame(term=broom::tidy(tefocusDTS)$term, tefocusDTS=broom::tidy(tefocusDTS)$estimate, tefocusGY=broom::tidy(tefocusGY)$estimate, tefocusGYraw=broom::tidy(tefocusGYraw)$estimate)
+
+## repeat focus
+
+r=sample(1:nrow(repeatfocus), nrow(repeatfocus)*0.8)
+train=repeatfocus[r,] %>% na.omit()
+dim(train)
+test=repeatfocus[-r,] %>% na.omit()
+trainDTS=train[,-c(3:5)]
+testDTS=test[,-c(3:5)]
+repeatfocusDTS=predictPhenotype(train_set=trainDTS, test_set=testDTS, method='ridge', returnModel=T)
+#cor.test(temp[,2], temp[,3])
+repeatfocusGY=predictPhenotype(train_set=train[,-c(2:3,5)], test_set=test[,-c(2:3,5)], method='ridge', returnModel=T)
+repeatfocusGYraw=predictPhenotype(train_set=train[,-c(2:4)], test_set=test[,-c(2:4)], method='ridge', returnModel=T)
+
+
+b=broom::tidy(repeatfocusDTS)
+b=broom::tidy(repeatfocusGY)
+b=broom::tidy(repeatfocusGYraw)
+
+repeatfocusRR=data.frame(term=broom::tidy(repeatfocusDTS)$term, repeatfocusDTS=broom::tidy(repeatfocusDTS)$estimate, repeatfocusGY=broom::tidy(repeatfocusGY)$estimate, repeatfocusGYraw=broom::tidy(repeatfocusGYraw)$estimate)
 
 
 
@@ -136,11 +173,26 @@ for(i in 6:ncol(newMat)){
 
 r=sample(1:nrow(newMat), nrow(newMat)*0.8)
 
+train=newMat[r,-c(3:5)] %>% na.omit()
+dim(train)
+test=newMat[-r,-c(3:5)] %>% na.omit()
+dts=predictPhenotype(train_set=train, test_set=test, method='ridge', returnModel=T)
+#cor.test(dts[,2], dts[,3])
+
+## second 
 train=newMat[r,-c(2:3,5)] %>% na.omit()
 dim(train)
 test=newMat[-r,-c(2:3,5)] %>% na.omit()
-temp=predictPhenotype(train_set=train, test_set=test, method='ridge')
-cor.test(temp[,2], temp[,3])
+gy=predictPhenotype(train_set=train, test_set=test, method='ridge', returnModel=T)
+#cor.test(dts[,2], dts[,3])
+
+## third
+train=newMat[r,-c(2:4)] %>% na.omit()
+dim(train)
+test=newMat[-r,-c(2:4)] %>% na.omit()
+gyraw=predictPhenotype(train_set=train, test_set=test, method='ridge', returnModel=T)
+#cor.test(dts[,2], dts[,3])
+
 
 ## just run fit function from above because i want the model to get coefficients!!!
 
@@ -151,11 +203,15 @@ head(rr)
 rr$genic=ifelse(rr$name=='FocusRegion', T, F)
 
 
-b=broom::tidy(fit)
-head(b)
-b$genic=rr$genic[match(b$term, paste0('X', rr$ref_range_id))]
+b=broom::tidy(dts)
 
-rr$estimate=b$estimate[match(paste0('X', rr$ref_range_id), b$term)]
+rr$dts=b$estimate[match(paste0('X', rr$ref_range_id), b$term)]
+b=broom::tidy(gy)
+
+rr$gy=b$estimate[match(paste0('X', rr$ref_range_id), b$term)]
+b=broom::tidy(gyraw)
+
+rr$gyraw=b$estimate[match(paste0('X', rr$ref_range_id), b$term)]
 
 
 pdf('~/transfer/ridgeregression_gs.pdf', 14,6)
