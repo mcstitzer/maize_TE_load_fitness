@@ -25,45 +25,46 @@ colnames(matchMatrix)=colnames(all.haps)
 ### make a matrix and save separately for each!
 dir.create('TEfamily_matrices/')
                               
+tefams=data.frame(RIL=rownames(all.haps))
+                              
+## get rid of b73 flavors and bad ranges
+b=read.table('refranges_B73correctlygenotypedAND1Mbrangeremoved.2022-03-22.txt', header=T)
+
+keepColnames=colnames(all.haps)%in% paste0('X',b$refrange[b$KEEPfinalFilter])
                               
 for(tefam in colnames(atorrm)[13:ncol(atorrm)]){
  tempMat=sapply(1:ncol(all.haps), function(refrange) atorrm[matchMatrix[,refrange],tefam])
  rownames(tempMat)=rownames(all.haps)
  colnames(tempMat)=colnames(all.haps)
- write.table(tempMat, paste0('TEfamily_matrices/',tefam, '.bp.txt'), row.names=T, col.names=T, quote=F, sep='\t')
-})
+ tefams[,tefam]=rowSums(tempMat[,keepColnames], na.rm=T)
+  ##writing output takes forever let's just get this done!!!
+# write.table(tempMat, paste0('TEfamily_matrices/',tefam, '.bp.txt'), row.names=T, col.names=T, quote=F, sep='\t')
+}
 #names(famMatrices)=colnames(atorrm)[13:ncol(atorrm)]
 #### wowowowow this might actually work!!!!
  ## lol saving in an array took 500 Gb so I changed to save each to disk separately :)
 
 
                     
-saveRDS(famMatrices, 'TEfamMatrixList_bpEachRefRange.RDS')
 
-   
-                    
-## get rid of b73 flavors and bad ranges
-b=read.table('refranges_B73correctlygenotypedAND1Mbrangeremoved.2022-03-22.txt', header=T)
-
-rilsumKeep=cbind(id=rownames(all.haps), data.frame(lapply(famMatrices, function(x) rowSums(x[,colnames(x) %in% paste0('X', b$refrange[b$KEEPfinalFilter])], na.rm=T)))
-    
-write.table(rilsumKeep, paste0('ril_TEFam_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
+write.table(tefams, paste0('ril_TEFam_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
 
 ### okay, i know this is horrible, but renaming parents to all.haps here because I don't want to rewrite all fo this
 all.haps=parents
-                                                          
-                                                          
-famMatrices=lapply(colnames(atorrm)[13:ncol(atorrm)], function(tefam){
+matchMatrix=data.frame(lapply(1:ncol(all.haps), function(refrange) match(all.haps[,refrange], paste0('R',atorrm$hapid))))
+colnames(matchMatrix)=colnames(all.haps)
+                                  
+tefams=data.frame(RIL=rownames(all.haps))
+                                               
+for(tefam in colnames(atorrm)[13:ncol(atorrm)]){
  tempMat=sapply(1:ncol(all.haps), function(refrange) atorrm[matchMatrix[,refrange],tefam])
  rownames(tempMat)=rownames(all.haps)
  colnames(tempMat)=colnames(all.haps)
- return(tempMat)
-})
-names(famMatrices)=colnames(atorrm)[13:ncol(atorrm)]
+ tefams[,tefam]=rowSums(tempMat[,keepColnames], na.rm=T)
+  ##writing output takes forever let's just get this done!!!
+# write.table(tempMat, paste0('TEfamily_matrices/',tefam, '.bp.txt'), row.names=T, col.names=T, quote=F, sep='\t')
+}
 
-
-parentsumKeep=cbind(id=rownames(all.haps), data.frame(lapply(famMatrices, function(x) rowSums(x[,colnames(x) %in% paste0('X', b$refrange[b$KEEPfinalFilter])], na.rm=T)))
-                    
-       
-write.table(parentsumKeep, paste0('parent_TEFam_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
+ 
+write.table(tefams, paste0('parent_TEFam_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
  
