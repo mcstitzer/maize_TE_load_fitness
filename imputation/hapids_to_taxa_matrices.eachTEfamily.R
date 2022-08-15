@@ -51,7 +51,7 @@ write.table(tefams, paste0('ril_TEFam_bp_repeats.', Sys.Date(), '.txt'), row.nam
 
 ### okay, i know this is horrible, but renaming parents to all.haps here because I don't want to rewrite all fo this
 all.haps=parents
-matchMatrix=data.frame(lapply(1:ncol(all.haps), function(refrange) match(all.haps[,refrange], paste0('R',atorrm$hapid))))
+matchMatrix=data.frame(lapply(1:ncol(all.haps), function(refrange) match(all.haps[,refrange], atorrm$hapid)))
 colnames(matchMatrix)=colnames(all.haps)
                                   
 tefams=data.frame(RIL=rownames(all.haps))
