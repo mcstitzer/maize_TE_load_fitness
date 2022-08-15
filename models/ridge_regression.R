@@ -10,17 +10,46 @@ library(glmnet)
 library(glmnetUtils)
 
 source('../figures/color_palette.R')
+namfams=read.table('../figures/nam_fams.txt')
+
+sk=read.table('../imputation/SampleToKeep.txt')
 
 
-teh=read.table('geno_pheno_gphenos.2022-08-05.txt', header=T)
+## check imputation to get tecounts object... i'm being lazy
+
+p=read.csv('../phenotypes/all_NAM_phenos.csv')
+h=read.csv('../phenotypes/BLUEs.csv')
+
+h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
+
+hp=readRDS('../phenotypes/NAM_H-pheno.rds')
+hp$genotype=rownames(hp)
+hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
+
+## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
+h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
+
+fams=read.table('../imputation/ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+
+fams$namRIL=substr(fams$RIL,1,9)
+fams$namFamily=substr(fams$RIL,1,4)
+
+fams$nam=namfams$V2[match(fams$namFamily, namfams$V1)]
+fams$subpop=nam$subpop[match(toupper(fams$nam), toupper(nam$genome))]
+fams$subpop[fams$subpop=='B73']=NA
+
+fams$keep=fams$RIL %in% sk$V1
+
+
+## these generate data frame with single measurment per ril, from the conservative keep list from cinta
+teh=merge(fams[fams$keep,], h[,-c(1)], by.x='namRIL', by.y='ID')
 
 
 ## set up 
 ## te focus
 ## all repeat focus
 ## # columns got to be: 1=sample name, 2=pheno value, 3:end=genotypes
-tefocus=teh[,c(1,27:30,6:16)]
-repeatfocus=teh[,c(1,27:30,6:16, 18:22)]
+tefocus=teh[,c(1,313:316,3:308)]
 
 
 
@@ -103,10 +132,6 @@ error <- function(obs, pred){
 #-------------------------------------------------------
 
 #loop starts here
-
-rr=read.table('../imputation/maize1_reference_ranges.csv', header=T, sep=',')
-head(rr)
-rr$genic=ifelse(rr$name=='FocusRegion', T, F)
 
 
 r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
