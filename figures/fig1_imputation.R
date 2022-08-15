@@ -141,6 +141,11 @@ lsv=read.table('../imputation/NAM_SV/longest_sv_RIL_genotypes.txt', header=T)
 gs$lsvGeno=lsv$svGeno[match(gs$id, lsv$ril)]
 parents$lsvGeno=parents$nam
 parents$lsvGeno[1]='B73'
+lsvn=read.table('../imputation/NAM_SV/longest_sv_per_nam.txt', header=T)
+lsvn$NAMcorr=sapply(1:nrow(lsvn), function(x) cor(gs$genomesize[gs$nam==lsvn$genome[x]], gs$tebp[gs$nam==lsvn$genome[x]], method='spearman'))
+lsvn$subpop=nam$subpop[match(toupper(lsvn$genome), toupper(nam$genome))]
+lsvn$subpop[lsvn$subpop=='B73']=NA
+
 
 pdf(paste0('~/transfer/supp2_imputationSV.', Sys.Date(), '.pdf'), 10,5)
 famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop, alpha=lsvGeno=='B73'))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
@@ -169,5 +174,7 @@ famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop, alpha=lsvGeno==
 
 famTE + labs(alpha="B73 allele\nat largest SV")
 
+ggplot(lsvn, aes(x=length, y=NAMcorr, color=subpop, label=genome)) + geom_text() + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)
+                    
 dev.off()
 
