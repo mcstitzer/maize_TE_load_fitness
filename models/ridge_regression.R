@@ -8,6 +8,7 @@ theme_set(theme_cowplot())
 library(plyr)
 library(glmnet)
 library(glmnetUtils)
+library(RColorBrewer)
 
 source('../figures/color_palette.R')
 namfams=read.table('../figures/nam_fams.txt')
@@ -81,14 +82,14 @@ predictPhenotype <- function(train_set, ## columns got to be: 1=sample name, 2=p
     # Model the matrices using glmnet
     cv <- glmnet::cv.glmnet(
       x      = x_train_mat,
-      y      = unlist(train[, 2]),
+      y      = unlist(train_set[, 2]),
       alpha  = 0,
       nfolds = nFolds
     )
     #fit model with optimum lambda
     fit <- glmnet::glmnet(
       x      = x_train_mat,
-      y      = unlist(train[, 2]),
+      y      = unlist(train_set[, 2]),
       alpha  = 0,
       lambda = cv$lambda.min, #10^seq(4, -3, length = 100), # grid
       thresh = 1e-12
@@ -108,9 +109,9 @@ predictPhenotype <- function(train_set, ## columns got to be: 1=sample name, 2=p
   if(!returnModel){
    return(
      data.frame(
-       name = test[,1],
+       name = test_set[,1],
        predicted = pred,
-       observed = test[,2]
+       observed = test_set[,2]
      )
      )
      }else{
@@ -166,19 +167,28 @@ mbTEs$Name=gsub('_LTR', '', gsub('_INT', '', mbTEs$Name))
 tefocusRR$Classification=mbTEs$Classification[match(tefocusRR$term, mbTEs$Name)]
 tefocusRR$totalbp=mbTEs$bp[match(tefocusRR$term, mbTEs$Name)]
 
-tefocusRR %>%group_by(Classification) %>% dplyr::summarize(posDTS=sum(tefocusDTS>0), negDTS=sum(tefocusDTS<0), posGY=sum(tefocusGY>0), negGY=sum(tefocusGY<0))
+tefocusRR %>%group_by(Classification) %>% dplyr::summarize(posDTS=sum(tefocusDTS>0), negDTS=sum(tefocusDTS<0), posGY=sum(tefocusGY>0), negGY=sum(tefocusGY<0), posGYraw=sum(tefocusGYraw>0), negGYraw=sum(tefocusGYraw<0))
 
 
-
+tefocusRR$superfam=str_split_fixed(tefocusRR$Classification, '/', 2)[,2]
+tefocusRR$superfam[tefocusRR$superfam%in%c('CRM','Gypsy')]='RLG'
 
 pdf('~/transfer/ridgeregression_tefams.pdf', 14,6)
-ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
-ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
-ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 
-ggplot(tefocusRR[-1,], aes(x=tefocusDTS*totalbp, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
-ggplot(tefocusRR[-1,], aes(x=tefocusGY*totalbp, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
-ggplot(tefocusRR[-1,], aes(x=tefocusGYraw*totalbp, y=totalbp, label=term, color=Classification)) + geom_text() +scale_y_log10()
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS*totalbp, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY*totalbp, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw*totalbp, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=reorder(term, tefocusDTS), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=reorder(term, tefocusGY), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=reorder(term, tefocusGYraw), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
+
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS*totalbp, y=reorder(term, tefocusDTS), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY*totalbp, y=reorder(term, tefocusGY), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw*totalbp, y=reorder(term, tefocusGYraw), label=term, color=superfam)) + geom_text()  + scale_color_brewer(palette='Set1') + geom_vline(xintercept=0) + geom_point(color='black', size=0.5)
 
 
 dev.off()
@@ -208,14 +218,44 @@ pred_accuracy=c()
   
   r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
 
-    train=tefocus[r,-c(2:3,5)] %>% na.omit()
-    test=tefocus[-r,-c(2:3,5)] %>% na.omit()
-    tefocusGYcor=predictPhenotype(train_set=train, test_set=test, method='ridge', returnModel=F)
+    trainGY=tefocus[r,-c(2:3,5)] %>% na.omit()
+    testGY=tefocus[-r,-c(2:3,5)] %>% na.omit()
+    tefocusGYcor=predictPhenotype(train_set=trainGY, test_set=testGY, method='ridge', returnModel=F)
 
 #    write.csv(temp_df, paste0(result_dir, '/predictedvalues_exp_haplotypes_sampleNAMtaxa/', tissue, '_', trait, '_train_NAMsample',sample, '_test_282.csv'))
     
     ra <- cor(tefocusGYcor[,2], tefocusGYcor[,3])
     pred_accuracy <- rbind(pred_accuracy, ra)
+
+dtscor=sapply(1:20, function(x) {
+  print(x)
+    r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
+trainDTS=tefocus[r,-c(3:5)] %>% na.omit()
+testDTS=tefocus[-r,-c(3:5)] %>% na.omit()
+tefocusDTScor=predictPhenotype(train_set=trainDTS, test_set=testDTS, method='ridge', returnModel=F)
+    ra <- cor(tefocusDTScor[,2], tefocusDTScor[,3])
+    return(ra)
+})
+
+gycor=sapply(1:20, function(x) {
+  print(x)
+    r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
+trainGY=tefocus[r,-c(2:3,5)] %>% na.omit()
+testGY=tefocus[-r,-c(2:3,5)] %>% na.omit()
+tefocusGYcor=predictPhenotype(train_set=trainGY, test_set=testGY, method='ridge', returnModel=F)
+    ra <- cor(tefocusGYcor[,2], tefocusGYcor[,3])
+    return(ra)
+})
+
+gyrawcor=sapply(1:20, function(x) {
+  print(x)
+    r=sample(1:nrow(tefocus), nrow(tefocus)*0.8)
+trainGYraw=tefocus[r,-c(2:4)] %>% na.omit()
+testGYraw=tefocus[-r,-c(2:4)] %>% na.omit()
+tefocusGYrawcor=predictPhenotype(train_set=trainGYraw, test_set=testGYraw, method='ridge', returnModel=F)
+    ra <- cor(tefocusGYrawcor[,2], tefocusGYrawcor[,3])
+    return(ra)
+})
 #    message('done with trait ', trait)
     
 #  }
