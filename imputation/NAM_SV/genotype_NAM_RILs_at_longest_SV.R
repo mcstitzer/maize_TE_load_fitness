@@ -1,5 +1,5 @@
-
-
+library(rtracklayer)
+library(dplyr)
 
 ## read in haplotypes for each ril
 all.haps=read.table('../phg_hapids_namrils_dbout.txt.gz', header=T)
@@ -30,6 +30,15 @@ lsvHaps$B73HapID=atorrm[atorrm$genotype=='B73',]$hapid[match(lsvHaps$refrange, a
 ### sort of slow but it's okay
 lsvHaps$OtherParentHapID=sapply(1:nrow(lsvHaps), function(x) atorrm$hapid[atorrm$genotype==lsvHaps$genome[x] & atorrm$refrange==lsvHaps$refrange[x]])
 
+atorrm$SVB73genotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$B73HapID) ]
+atorrm$SVOthergenotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$OtherParentHapID) ]
+                                
+b73allele=atorrm %>% group_by(SVB73genotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
+otherallele=atorrm %>% group_by(SVOthergenotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
+  ### Ohno this is not good - there are negative nonTE bp because there are more TEs than bp in the region....
+  ### back to the drawing board, recheck imputation again...
+                                
+                                
 ## now, for each RIL, get proportion of SV that is each parent
 namfams=read.table('../../figures/nam_fams.txt') 
 svGenos=data.frame(ril=rownames(all.haps))
