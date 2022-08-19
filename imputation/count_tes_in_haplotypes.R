@@ -28,7 +28,7 @@ a$hapwidth=a$endmax-a$startmin
 a$genotype[a$genotype=='IL14H']='Il14H'
 
 ## read in refrange id so that it's easy to combine with other files
-b=read.table('hapids_to_refranges.txt', comment.char='')
+b=read.table('hapids_to_refranges.txt', header=T, comment.char='')
 a$refrange=b$refrange[match(a$hapid, b$hapid)]
 
 
@@ -67,98 +67,6 @@ for(i in c(tesup, names(otherClassifications), names(specificRepeats))){
 a=data.frame(a) ## just in case it's a data table              
 tes=vector(mode = "list", length = length(genomes)) ## this is a list of the te annotation of each genome
 names(tes)=genomes
-
-
-
-
-
-## loop through and populate the entry of tes
-for(genome in genomes){
- ## read in EDTA TE annotation
- if(genome=='B73'){te=import.gff3('../annotations/tes/Zm-B73-REFERENCE-NAM-5.0.TE.gff3.gz')}
-  else{
- te=import.gff(paste0('../annotations/tes/Zm-', genome, '-REFERENCE-NAM-1.0.TE.gff3.gz'))}
- ## reformat to get superfamily for each TE annotation
- te$sup=str_split_fixed(te$Classification, '/', 2)[,2]
- te$sup[te$sup=='Gypsy']='RLG'
- te$sup[te$sup=='Copia']='RLC'
- te$sup[te$sup=='unknown' & te$Classification=='LTR/unknown']='RLX'
- te$sup[te$sup=='Helitron']='DHH'
- te$sup[te$sup=='CRM']='RLG' ## need these and following ones because not structural
- te$sup[te$sup=='L1']='RIL'
- te$sup[te$sup=='RTE']='RIT'
- te$sup[te$sup=='unknown' & te$Classification=='LINE/unknown']='RIX'
- 
- te$sup[!te$Classification %in% classificationTE]=NA
-
-## make sure we added right
-  assert_that(sum(te$Classification %in% c('DNA/DTA', 'MITE/DTA'))==sum(te$sup=='DTA', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTC', 'MITE/DTC'))==sum(te$sup=='DTC', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTH', 'MITE/DTH'))==sum(te$sup=='DTH', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTM', 'MITE/DTM'))==sum(te$sup=='DTM', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTT', 'MITE/DTT'))==sum(te$sup=='DTT', na.rm=T))
-  assert_that(sum(te$Classification %in% c('LTR/CRM', 'LTR/Gypsy'))==sum(te$sup=='RLG', na.rm=T))
-
-## Oh7B TE annotation has "oh7b" on the chromosome names... just remove that
- if(genome=='Oh7B'){seqlevels(te)=gsub(tolower(paste0(genome, '_')), '', tolower(seqlevels(te)))}
-
-## get the hapids that come from this genome
- haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
- haps$hapid=a$hapid[a$genotype==genome]
-
-
-  ## two adjacent haplotype ranges that have a te spanning them don't get intersected with intersect(reduce(te), haps, 
-  ### so pintersect to collapse the sets of overlapping ranges
-  tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% classificationTE,]), haps, ignore.strand=T)
-  thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-  ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-  thro=findOverlaps(ov, haps, ignore.strand=T)
-  tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a$TEbp[a$genotype==genome][unique(subjectHits(thro))]=tebp
-
-  ### by superfamily
-  for(sup in tesup){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$sup==sup & !is.na(te$sup),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a[,paste0(sup,'bp')][a$genotype==genome][unique(subjectHits(thro))]=tebp
-
-    }
-   ### for completeness, add in centromere, knob, ribosome, telomere
-   for(classif in names(otherClassifications)){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% unlist(otherClassifications[classif]),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-      colname=paste0(classif, 'bp')
-      a[,colname][a$genotype==genome][unique(subjectHits(thro))]=tebp
-      a[,colname]=as.numeric(a[,colname])
-
-    }
-                  
-   ### for completeness, add specific counts of knob180, tr1, and crm
-   for(classif in names(specificRepeats)){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% unlist(specificRepeats[classif]),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-      colname=paste0(classif, 'bp')
-      a[,colname][a$genotype==genome][unique(subjectHits(thro))]=tebp
-      a[,colname]=as.numeric(a[,colname])
-
-    }
-                  
-              
-
-print(genome)
-} ## running through here overnight, 3/15!!!
-
-a$nonTEbp=a$endmax+1-a$startmin-a$TEbp
-write.table(a, paste0('allNAM_hapids.TEbp.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 
 #######################################################3
@@ -204,6 +112,13 @@ for(genome in genomes){
 ## get the hapids that come from this genome
  haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
  haps$hapid=a$hapid[a$genotype==genome]
+          
+ ### testing! as a solution to structural variatns
+ longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
+ longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
+ if(length(longhaps)>0){ ###### THIS SETDIFF ISN"T WORKING - NEEd TO THINK THROUGH MULTIPLE LINES
+ haps[unique(queryHits(longhapov)[duplicated(queryHits(longhapov))]),]=setdiff(haps[unique(queryHits(longhapov)[duplicated(queryHits(longhapov))]),], haps[unique(subjectHits(longhapov)[duplicated(queryHits(longhapov))]),])
+  }
 
 
   ## two adjacent haplotype ranges that have a te spanning them don't get intersected with intersect(reduce(te), haps, 
@@ -267,6 +182,12 @@ anona[anona$nonTEbp<0, 11:32]=NA
 write.table(anona, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 
+## testing
+reala=a
+a=reala[reala$refrange %in% 51085:51120,]
 
-
+pdf('~/transfer/problem_rr.pdf',10,25)
+## oh7b coords are way off because of translocation, skip it
+ggplot(a[a$genotype!='Oh7B',], aes(x=startmin, y=refrange, xend=endmax, yend=refrange, color=factor(refrange))) + geom_segment() + facet_wrap(~genotype, ncol=1)
+dev.off()
 
