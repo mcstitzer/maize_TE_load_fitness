@@ -116,9 +116,10 @@ for(genome in genomes){
  ### testing! as a solution to structural variatns
  longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
  longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
- if(length(longhaps)>0){ ###### THIS SETDIFF ISN"T WORKING - NEEd TO THINK THROUGH MULTIPLE LINES
- haps[unique(queryHits(longhapov)[duplicated(queryHits(longhapov))]),]=setdiff(haps[unique(queryHits(longhapov)[duplicated(queryHits(longhapov))]),], haps[unique(subjectHits(longhapov)[duplicated(queryHits(longhapov))]),])
-  }
+ if(length(longhaps)>0){
+           for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
+ ranges(haps[longhap,])=ranges(setdiff(haps[longhap,], haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),])[1,])
+  }}
 
 
   ## two adjacent haplotype ranges that have a te spanning them don't get intersected with intersect(reduce(te), haps, 
