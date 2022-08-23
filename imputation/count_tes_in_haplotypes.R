@@ -182,17 +182,17 @@ write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.', Sys.Date(), '.txt'), quot
 
 ## when nonB73 haplotypes overlap, I can end up with negative TE bp in a region
 ## will do more troubleshooting, but for now, set to NA and continue
-anona=a
-anona[anona$nonTEbp<0, 11:32]=NA
-write.table(anona, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+#anona=a
+#anona[anona$nonTEbp<0, 11:32]=NA
+#write.table(anona, paste0('allNAM_hapids.TEbpUpdate.sup.overlappingRRNA.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 
 ## testing
-reala=a
-a=reala[reala$refrange %in% 51085:51120,]
+#reala=a
+#a=reala[reala$refrange %in% 51085:51120,]
 
-pdf('~/transfer/problem_rr.pdf',10,25)
+#pdf('~/transfer/problem_rr.pdf',10,25)
 ## oh7b coords are way off because of translocation, skip it
-ggplot(a[a$genotype!='Oh7B',], aes(x=startmin, y=refrange, xend=endmax, yend=refrange, color=factor(refrange))) + geom_segment() + facet_wrap(~genotype, ncol=1)
-dev.off()
+#ggplot(a[a$genotype!='Oh7B',], aes(x=startmin, y=refrange, xend=endmax, yend=refrange, color=factor(refrange))) + geom_segment() + facet_wrap(~genotype, ncol=1)
+#dev.off()
 
