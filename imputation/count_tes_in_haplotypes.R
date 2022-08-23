@@ -114,17 +114,16 @@ for(genome in genomes){
  haps$hapid=a$hapid[a$genotype==genome]
           
  ### testing! as a solution to structural variatns
+          
+ withinhaps=findOverlaps(haps, drop.self=T, type='within') ## these will be caught by the outer haplotype, and bp counted for them
+ haps=haps[-queryHits(withinhaps),]
  longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
  longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
- while(length(longhaps)>0){
-            longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
-            longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
-  #         for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
+ if(length(longhaps)>0){
+     for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
            longhap=longhaps[1]
                     ranges(haps[longhap,])=ranges(setdiff(haps[longhap,], haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),])[1,])
-           longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
-            longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
-           }#}
+           }}
 
 
   ## two adjacent haplotype ranges that have a te spanning them don't get intersected with intersect(reduce(te), haps, 
