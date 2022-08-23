@@ -116,7 +116,9 @@ for(genome in genomes){
  ### testing! as a solution to structural variatns
           
  withinhaps=findOverlaps(haps, drop.self=T, type='within') ## these will be caught by the outer haplotype, and bp counted for them
- haps=haps[-queryHits(withinhaps),]
+ if(length(withinhaps)>0){
+          haps=haps[-queryHits(withinhaps),]
+           }
  longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
  longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
  if(length(longhaps)>0){
