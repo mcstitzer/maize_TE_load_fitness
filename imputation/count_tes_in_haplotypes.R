@@ -112,19 +112,33 @@ for(genome in genomes){
 ## get the hapids that come from this genome
  haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
  haps$hapid=a$hapid[a$genotype==genome]
-          
+ 
  ### testing! as a solution to structural variatns
           
- withinhaps=findOverlaps(haps, drop.self=T, type='within') ## these will be caught by the outer haplotype, and bp counted for them
- if(length(withinhaps)>0){
-          haps=haps[-subjectHits(withinhaps),]
-           }
+ ## 1. flag any overlapping
+# longhapov=findOverlaps(haps, drop.self=T)
+# haps$overlap=1:length(haps) %in% unique(unlist(queryHits(longhapov), subjectHits(longhapov)))
+# a$hapov[a$genotype==genome]=haps$overlap
+#          
+#longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
+# if(length(longhaps)>0){
+#    for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
+#        longhap=longhaps[1]
+#        insidehaps=haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),]
+#        for(insidehap in 1:length(insidehaps)){
+#          ranges(haps[longhap,])=ranges(GenomicRanges::setdiff(haps[longhap,], insidehaps[insidehap,])[1,])
+#    }}}
+          
+# withinhaps=findOverlaps(haps, drop.self=T, type='within') ## these will be caught by the outer haplotype, and bp counted for them
+# if(length(withinhaps)>0){
+#          haps=haps[-queryHits(withinhaps),]
+#           }
  longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
  longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
  if(length(longhaps)>0){
      for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
            longhap=longhaps[1]
-                    ranges(haps[longhap,])=ranges(setdiff(haps[longhap,], haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),])[1,])
+                    ranges(haps[longhap,])=ranges(GenomicRanges::setdiff(haps[longhap,], haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),])[1,])
            }}
 
 
