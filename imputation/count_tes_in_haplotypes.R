@@ -36,8 +36,6 @@ a$refrange=b$refrange[match(a$hapid, b$hapid)]
 ## Read in TE annotation to count TEs per haplotype ##
 ######################################################
 
-## make a different data frame for each of the NAM genomes, assign each TE in each genome into a haplotype
-
 ### do this across all NAM
 genomes=c('B73', 'CML103', 'CML247', 'CML52', 'CML69', 'Ky21', 'M162W', 'Mo18W', 'Oh43', 'P39', 
           'B97', 'CML228', 'CML277', 'CML322', 'CML333', 'HP301', 'Il14H', ## note here the capitalization of Il14H!!!!! phg uses IL14H
