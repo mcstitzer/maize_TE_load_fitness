@@ -114,42 +114,45 @@ for(genome in genomes){
  ### testing! as a solution to structural variatns
           
  ## 1. flag any overlapping
-# longhapov=findOverlaps(haps, drop.self=T)
-# haps$overlap=1:length(haps) %in% unique(unlist(queryHits(longhapov), subjectHits(longhapov)))
-# a$hapov[a$genotype==genome]=haps$overlap
-#          
-#longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
-# if(length(longhaps)>0){
-#    for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
-#        longhap=longhaps[1]
-#        insidehaps=haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),]
-#        for(insidehap in 1:length(insidehaps)){
-#          ranges(haps[longhap,])=ranges(GenomicRanges::setdiff(haps[longhap,], insidehaps[insidehap,])[1,])
-#    }}}
+ longhapov=findOverlaps(haps, drop.self=T)
+ haps$overlap=1:length(haps) %in% unique(unlist(queryHits(longhapov), subjectHits(longhapov)))
+ a$hapov[a$genotype==genome]=haps$overlap
+          
+longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
+ if(length(longhaps)>0){
+    for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
+        longhap=longhaps[1]
+        insidehaps=haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),]
+        for(insidehap in 1:length(insidehaps)){
+          ranges(haps[longhap,])=ranges(GenomicRanges::setdiff(haps[longhap,], insidehaps[insidehap,])[1,])
+    }}}
           
 # withinhaps=findOverlaps(haps, drop.self=T, type='within') ## these will be caught by the outer haplotype, and bp counted for them
 # if(length(withinhaps)>0){
 #          haps=haps[-queryHits(withinhaps),]
 #           }
- longhapov=findOverlaps(haps, drop.self=T) ## this finds overlapping haplotypes
- longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
- if(length(longhaps)>0){
-     for(longhap in longhaps){ ### this should be robust to strand??? since these are all unstranded
-           longhap=longhaps[1]
-                    ranges(haps[longhap,])=ranges(GenomicRanges::setdiff(haps[longhap,], haps[unique(subjectHits(longhapov)[queryHits(longhapov)==longhap]),])[1,])
-           }}
 
+          
 
   ## two adjacent haplotype ranges that have a te spanning them don't get intersected with intersect(reduce(te), haps, 
-  ### so pintersect to collapse the sets of overlapping ranges
-  tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% classificationTE,]), haps, ignore.strand=T)
-  thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-  ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-  thro=findOverlaps(ov, haps, ignore.strand=T)
-  tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a$TEbp[a$genotype==genome]=0
-  a$TEbp[a$genotype==genome][unique(subjectHits(thro))]=tebp
+#  ### so pintersect to collapse the sets of overlapping ranges
+#  tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% classificationTE,]), haps, ignore.strand=T)
+#  thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
+#  ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
+#  thro=findOverlaps(ov, haps, ignore.strand=T)
+#  tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+#  a$TEbp[a$genotype==genome]=0
+#  a$TEbp[a$genotype==genome][unique(subjectHits(thro))]=tebp
 
+          
+### try this new findoverlappairs thing which is absolutely amazing
+   tehapintersect=findOverlapPairs(  haps, reduce(te[te$Classification %in% classificationTE,]), ignore.strand=T)
+   ov=pintersect(tehapintersect, ignore.strand=T)
+   tebp= data.frame(ov) %>% group_by(hapid) %>% dplyr::summarize(out=sum(width))
+   a$TEbp[a$genotype==genome]=0
+   a$TEbp[a$genotype==genome & a$hapid %in% tebp$hapid]=tebp$out[match(a$hapid[a$genotype==genome& a$hapid %in% tebp$hapid], tebp$hapid)]
+
+              
   ### by superfamily
   for(sup in tesup){
       tehapintersect=GenomicRanges::intersect(reduce(te[te$sup==sup & !is.na(te$sup),]), haps, ignore.strand=T)
