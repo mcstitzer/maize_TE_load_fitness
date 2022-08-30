@@ -63,7 +63,7 @@ parents[parents==-1]=NA
 
 
 ## this is the values for each haplotype of how many TEs there are
-atorrm=read.table('allNAM_hapids.TEbpUpdate.sup.2022-07-12.txt', header=T, comment.char='')
+atorrm=read.table('allNAM_hapids.TEbpUpdate.sup.2022-08-30.txt', header=T, comment.char='')
 
 gsmat=sapply(1:ncol(all.haps), function(x) atorrm$hapwidth[match(all.haps[,x], atorrm$hapid)])
 temat=sapply(1:ncol(all.haps), function(x) atorrm$TEbp[match(all.haps[,x], atorrm$hapid)])
