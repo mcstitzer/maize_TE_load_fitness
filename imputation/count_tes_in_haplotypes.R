@@ -2,6 +2,7 @@ library(stringr)
 library(data.table)
 library(rtracklayer)
 library(assertthat)
+library(dplyr)
 
 
 ##################################
