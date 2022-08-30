@@ -155,36 +155,36 @@ longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
               
   ### by superfamily
   for(sup in tesup){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$sup==sup & !is.na(te$sup),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a[,paste0(sup,'bp')][a$genotype==genome][unique(subjectHits(thro))]=tebp
+     # tehapintersect=GenomicRanges::intersect(reduce(te[te$sup==sup & !is.na(te$sup),]), haps, ignore.strand=T)
+      tehapintersect=findOverlapPairs(haps, reduce(te[te$sup==sup & !is.na(te$sup),]), ignore.strand=T)
+     # thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
+      ov=pintersect(tehapintersect, ignore.strand=T)
+     # ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
+     # thro=findOverlaps(ov, haps, ignore.strand=T)
+      tebp=data.frame(ov) %>% group_by(hapid) %>% dplyr::summarize(out=sum(width))
+     # tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+      a[,paste0(sup,'bp')][a$genotype==genome & a$hapid %in% tebp$hapid]=tebp$out[match(a$hapid[a$genotype==genome& a$hapid %in% tebp$hapid], tebp$hapid)]
+     # a[,paste0(sup,'bp')][a$genotype==genome][unique(subjectHits(thro))]=tebp
 
     }
    ### for completeness, add in centromere, knob, ribosome, telomere
    for(classif in names(otherClassifications)){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% unlist(otherClassifications[classif]),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+      tehapintersect=findOverlapPairs(haps, reduce(te[te$Classification %in% unlist(otherClassifications[classif]),]), ignore.strand=T)
+      ov=pintersect(tehapintersect, ignore.strand=T)
+     tebp=data.frame(ov) %>% group_by(hapid) %>% dplyr::summarize(out=sum(width))
       colname=paste0(classif, 'bp')
-      a[,colname][a$genotype==genome][unique(subjectHits(thro))]=tebp
+      a[,colname][a$genotype==genome & a$hapid %in% tebp$hapid]=tebp$out[match(a$hapid[a$genotype==genome& a$hapid %in% tebp$hapid], tebp$hapid)]
       a[,colname]=as.numeric(a[,colname])
 
     }
                   
    ### for completeness, add specific counts of knob180, tr1, and crm
    for(classif in names(specificRepeats)){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$Classification %in% unlist(specificRepeats[classif]),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+       tehapintersect=findOverlapPairs(haps, reduce(te[te$Classification %in% unlist(otherClassifications[classif]),]), ignore.strand=T)
+      ov=pintersect(tehapintersect, ignore.strand=T)
+     tebp=data.frame(ov) %>% group_by(hapid) %>% dplyr::summarize(out=sum(width))
       colname=paste0(classif, 'bp')
-      a[,colname][a$genotype==genome][unique(subjectHits(thro))]=tebp
+      a[,colname][a$genotype==genome & a$hapid %in% tebp$hapid]=tebp$out[match(a$hapid[a$genotype==genome& a$hapid %in% tebp$hapid], tebp$hapid)]
       a[,colname]=as.numeric(a[,colname])
 
     }
@@ -194,6 +194,9 @@ longhaps=unique(queryHits(longhapov)[duplicated(queryHits(longhapov))])
 print(genome)
 } ## running through here overnight!!!
 
+                
+### NOTE - there will be slight discrepancies when there are overlapping TE families, between rowSums of TE superfams, and TEbp!!! TEbp is always smaller
+                
 a$nonTEbp=a$endmax+1-a$startmin-a$TEbp
 write.table(a, paste0('allNAM_hapids.TEbpUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
