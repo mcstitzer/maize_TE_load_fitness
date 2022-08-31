@@ -163,8 +163,8 @@ rilsum=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat, na.rm=T),
                  tr1bp=rowSums(tr1mat, na.rm=T),
                  centromerebp=rowSums(centromeremat, na.rm=T),
                  telomerebp=rowSums(telomeremat, na.rm=T),
-                 ribosomalbp=rowSums(ribosomalmat, na.rm=T),
-                 b73bp=rowSums(b73mat, na.rm=T))
+                 ribosomalbp=rowSums(ribosomalmat, na.rm=T))#,
+ #                b73bp=rowSums(b73mat, na.rm=T))
 
 rilsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(gsmat)%in% paste0('X',b$refrange[b$KEEPfinalFilter])], na.rm=T), 
                       tebp=rowSums(temat[,colnames(gsmat)%in% paste0('X',b$refrange[b$KEEPfinalFilter])], na.rm=T),
