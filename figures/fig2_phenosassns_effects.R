@@ -7,10 +7,10 @@ library(ggrepel)
 source('../figures/color_palette.R')
 
 
-teh=read.table('../models/geno_pheno_gphenos.2022-08-05.txt', header=T)
+teh=read.table('../models/geno_pheno_gphenos.2022-08-31.txt', header=T)
 
-pahDF=read.table('../models/lm_output_gphenos.2022-08-05.txt', header=T)
-pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-08-05.txt', header=T)
+pahDF=read.table('../models/lm_output_gphenos.2022-08-31.txt', header=T)
+pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-08-31.txt', header=T)
 pahFam$effect=pahFam$gsEffect ## go back and change this in generating file in models dir
 pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## also go back and do this there
 
@@ -152,8 +152,8 @@ dev.off()
 
 ### add in ril inbred phenos from merritt
 
-pahPDF=read.table('../models/lm_output_pphenos.2022-07-14.txt ', header=T)
-tep=read.table('../models/geno_pheno_pphenos.2022-07-14.txt', header=T)
+pahPDF=read.table('../models/lm_output_pphenos.2022-08-31.txt ', header=T)
+tep=read.table('../models/geno_pheno_pphenos.2022-08-31.txt', header=T)
 
 
 pdf('~/transfer/flowering_inbreds.pdf')
