@@ -173,6 +173,8 @@ tefocusRR %>%group_by(Classification) %>% dplyr::summarize(posDTS=sum(tefocusDTS
 tefocusRR$superfam=str_split_fixed(tefocusRR$Classification, '/', 2)[,2]
 tefocusRR$superfam[tefocusRR$superfam%in%c('CRM','Gypsy')]='RLG'
 
+write.table(tefocusRR, paste0('te_fam_ridgeregression.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+
 pdf('~/transfer/ridgeregression_tefams.pdf', 14,6)
 ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=totalbp, label=term, color=superfam)) + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
