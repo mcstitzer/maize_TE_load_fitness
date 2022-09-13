@@ -38,6 +38,10 @@ ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=meangenedist, label=term, color=super
 ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=meangenedist, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=meangenedist, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() +scale_y_log10() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+
 
 ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
@@ -54,5 +58,9 @@ ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=umrCount, label=term, color=superfa
 ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=meangenedist, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=meangenedist, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=meangenedist, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+
+ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
+ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 
 dev.off()
