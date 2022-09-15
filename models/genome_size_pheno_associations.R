@@ -27,7 +27,11 @@ hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
 ## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
 h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
 
-gs=read.table('../imputation/ril_bp_repeats.noB73filter.2022-08-31.txt', header=T, comment.char='')
+#gs=read.table('../imputation/ril_bp_repeats.noB73filter.2022-08-31.txt', header=T, comment.char='')
+
+for(b73CorrectNumber in c(0,5,10,20,22,37)){
+
+gs=read.table(paste0('../imputation/ril_bp_repeats.greaterthan',b73CorrectNumber,'B73correct.2022-09-15.txt'), header=T, comment.char='')
 
 gs$namRIL=substr(gs$id,1,9)
 gs$namFamily=substr(gs$id,1,4)
@@ -114,8 +118,8 @@ pahDF=do.call('rbind', pahList)
 pahFList=lapply(colnames(gs)[c(2:16,19:(which(colnames(gs)=='namRIL')-1))], function(x) runAssnH(x, famSpecific=T))
 pahFDF=do.call('rbind', pahFList)
 
-write.table(pahDF, paste0('lm_output_gphenos.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
-write.table(pahFDF, paste0('lm_output_gphenos.namFamily.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(pahDF, paste0('lm_output_gphenos.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(pahFDF, paste0('lm_output_gphenos.namFamily.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
 ## continue for merritt's phenos
 pahPList=lapply(colnames(gs)[c(2:16,19:(which(colnames(gs)=='namRIL')-1))], function(x) runAssnP(x))
@@ -125,12 +129,13 @@ pahPDF=do.call('rbind', pahPList)
 pahPFList=lapply(colnames(gs)[c(2:16,19:(which(colnames(gs)=='namRIL')-1))], function(x) runAssnP(x, famSpecific=T))
 pahPFDF=do.call('rbind', pahPFList)
 # diff in filename is mphenos not gphenos
-write.table(pahPDF, paste0('lm_output_mphenos.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
-write.table(pahPFDF, paste0('lm_output_mphenos.namFamily.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(pahPDF, paste0('lm_output_mphenos.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(pahPFDF, paste0('lm_output_mphenos.namFamily.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
                  
                  
 ## also write out teh and tep, to use for figures - these are the merged geno and pheno
                  
-write.table(teh, paste0('geno_pheno_gphenos.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
-write.table(tep, paste0('geno_pheno_mphenos.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(teh, paste0('geno_pheno_gphenos.greaterthan',b73CorrectNumber, 'b73correct.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+write.table(tep, paste0('geno_pheno_mphenos.greaterthan',b73CorrectNumber, 'b73correct.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+}
