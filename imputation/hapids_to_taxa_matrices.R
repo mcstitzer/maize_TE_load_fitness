@@ -204,28 +204,36 @@ rilsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(
             head(rilsumKeep)
 write.table(rilsumKeep, paste0('ril_bp_repeats.greaterthan', minB73correct, 'B73correct.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
 }                    
-                    
-     parentsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T), 
-                      tebp=rowSums(temat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     nontebp=rowSums(nontemat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dhhbp=rowSums(dhhmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dtabp=rowSums(dtamat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dtcbp=rowSums(dtcmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dthbp=rowSums(dthmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dtmbp=rowSums(dtmmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     dttbp=rowSums(dttmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     rilbp=rowSums(rilmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     ritbp=rowSums(ritmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     rlcbp=rowSums(rlcmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     rlgbp=rowSums(rlgmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     rlxbp=rowSums(rlxmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     allknobbp=rowSums(allknobmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     knob180bp=rowSums(knob180mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     tr1bp=rowSums(tr1mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     centromerebp=rowSums(centromeremat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     telomerebp=rowSums(telomeremat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     ribosomalbp=rowSums(ribosomalmat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T),
-                     b73bp=rowSums(b73mat[,colnames(gsmat)%in% paste0('R',b$refrange[b$KEEPfinalFilter])], na.rm=T))
-               
+           
+## switch out above for parents as all.haps and rerun matrices
+for(minB73correct in c(0,5,10,20,22,37)){
+
+KEEPb73=b$refrange[b$nB73correct>minB73correct]
+  
+     parentsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T), 
+                      tebp=rowSums(temat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     nontebp=rowSums(nontemat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dhhbp=rowSums(dhhmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dtabp=rowSums(dtamat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dtcbp=rowSums(dtcmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dthbp=rowSums(dthmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dtmbp=rowSums(dtmmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     dttbp=rowSums(dttmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     rilbp=rowSums(rilmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     ritbp=rowSums(ritmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     rlcbp=rowSums(rlcmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     rlgbp=rowSums(rlgmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     rlxbp=rowSums(rlxmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     allknobbp=rowSums(allknobmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     knob180bp=rowSums(knob180mat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     tr1bp=rowSums(tr1mat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     centromerebp=rowSums(centromeremat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     telomerebp=rowSums(telomeremat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     ribosomalbp=rowSums(ribosomalmat[,colnames(gsmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     b73bp=rowSums(b73bpmat[,colnames(b73bpmat)%in% paste0('R',KEEPb73)], na.rm=T),
+                     b73rr=rowSums(b73mat[,colnames(b73mat) %in% paste0('R', KEEPb73)],na.rm=T))
+                       print(paste0('so now done with ', minB73correct))
+            print(head(rilsumKeep))
+    
 write.table(parentsumKeep, paste0('parent_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
- 
+ }
