@@ -15,7 +15,7 @@ source('../figures/color_palette.R')
 namfams=read.table('../figures/nam_fams.txt')
 sk=read.table('../imputation/SampleToKeep.txt')
 
-gs=read.table('../imputation/ril_bp_repeats.noB73filter.2022-08-31.txt', header=T, comment.char='')
+gs=read.table('../imputation/ril_bp_repeats.greaterthan22B73correct.2022-09-15.txt', header=T, comment.char='')
 gs$namRIL=substr(gs$id,1,9)
 gs$namFamily=substr(gs$id,1,4)
 
@@ -36,7 +36,7 @@ gs=gs[!gs$threesd,]
 
 
 ## need to redo this part and it's a pain...
-parents=read.table('../imputation/parent_bp_repeats.2022-09-02.txt', header=T)
+parents=read.table('../imputation/parent_bp_repeatsgreaterthan22B73correct.2022-09-16.txt', header=T)
 parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$id, '_', 2)[,1]), toupper(namfams$V2))]
 parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
 parents$subpop[parents$subpop=='B73']=NA
