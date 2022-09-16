@@ -233,7 +233,7 @@ KEEPb73=b$refrange[b$nB73correct>minB73correct]
                      b73bp=rowSums(b73bpmat[,colnames(b73bpmat)%in% paste0('R',KEEPb73)], na.rm=T),
                      b73rr=rowSums(b73mat[,colnames(b73mat) %in% paste0('R', KEEPb73)],na.rm=T))
                        print(paste0('so now done with ', minB73correct))
-            print(head(rilsumKeep))
+            print(head(parentsumKeep))
     
-write.table(parentsumKeep, paste0('parent_bp_repeats.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
+write.table(parentsumKeep, paste0('parent_bp_repeatsgreaterthan', minB73correct, 'B73correct.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
  }
