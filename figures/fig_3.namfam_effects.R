@@ -10,9 +10,9 @@ source('../figures/color_palette.R')
 legend=readRDS('subpopulation_legend.RDS')
 
 
-teh=read.table('../models/geno_pheno_gphenos.2022-08-31.txt', header=T)
+teh=read.table('../models/geno_pheno_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
 
-pahFam=read.table('../models/lm_output_gphenos.namFamily.2022-08-31.txt', header=T)
+pahFam=read.table('../models/lm_output_gphenos.namFamily.greaterthan22b73correct.2022-09-15.txt', header=T)
 
 ## we probably want families labeled, at least the sig ones!
 
