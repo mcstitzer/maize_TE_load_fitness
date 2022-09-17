@@ -5,6 +5,7 @@ theme_set(theme_cowplot())
 library(rtracklayer)
 library(plyr)
 library(stringr)
+library(dplyr)
 
 source('../figures/color_palette.R')
 
@@ -48,7 +49,7 @@ names(specificRepeats)=c('knob180', 'tr1', 'crm') ## keep separate knobs, centro
 
 
 lens=data.frame(tem) %>% filter(Classification %in% unlist(classificationTE)) %>% group_by(Name, Classification) %>% 
-dplyr::summarize(meangenedist=mean(genedist), mingenedist=min(genedist), maxgenedist=max(genedist),
-                 meancoredist=mean(coredist), mincoredist=min(coredist), maxcoredist=max(coredist))
+dplyr::summarize(meangenedist=mean(genedist, na.rm=T), mingenedist=min(genedist, na.rm=T), maxgenedist=max(genedist, na.rm=T),
+                 meancoredist=mean(coredist, na.rm=T), mincoredist=min(coredist, na.rm=T), maxcoredist=max(coredist, na.rm=T))
 
 write.table(lens, 'te_fam_gene_dist_B73.txt', sep='\t', quote=F, row.names=F, col.names=T)
