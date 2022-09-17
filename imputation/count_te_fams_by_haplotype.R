@@ -71,7 +71,22 @@ mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=
 write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
              
                 
-                
+## sups too
+ te=at
+ te$sup=str_split_fixed(te$Classification, '/', 2)[,2]
+ te$sup[te$sup=='Gypsy']='RLG'
+ te$sup[te$sup=='Copia']='RLC'
+ te$sup[te$sup=='unknown' & te$Classification=='LTR/unknown']='RLX'
+ te$sup[te$sup=='Helitron']='DHH'
+ te$sup[te$sup=='CRM']='RLG' ## need these and following ones because not structural
+ te$sup[te$sup=='L1']='RIL'
+ te$sup[te$sup=='RTE']='RIT'
+ te$sup[te$sup=='unknown' & te$Classification=='LINE/unknown']='RIX'
+ 
+ te$sup[!te$Classification %in% classificationTE]=NA
+supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
+write.table(supTEs, 'TE_content_across_NAM_genotypes_by_sup.txt', row.names=F, col.names=T, sep='\t', quote=F)
+
 
               
 ## not all things in the TE file are TEs, so set up these categories
