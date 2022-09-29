@@ -65,11 +65,12 @@ pdf(paste0('~/transfer/fig4_supAndFam.', Sys.Date(), '.pdf'),12,7)
   supscaled= plot_grid(dtsp + theme(legend.position='NULL'), gyrawp+ theme(legend.position='NULL'), gyp+ theme(legend.position='NULL'), ncol=3, labels='AUTO')
         supscaled
               
-   dtsp=ggplot(mc[-1,], aes(x=dts.estimate, y=sup, color=sup, size=supbp)) + geom_vline(xintercept=0, lty='dashed', color='gray') + geom_point()+ scale_color_manual(values=dd.col)+ ylab('Superfamily') + xlab('Effect on DTS, per base pair')
+   dtsp=ggplot(mc[-1,], aes(x=dts.estimate, y=sup, color=sup, size=supbp)) + geom_vline(xintercept=0, lty='dashed', color='gray') + geom_point()+ scale_color_manual(values=dd.col)+ ylab('Superfamily') + xlab('Effect on DTS, per base pair')+ guides( color='none', size=guide_legend(order=2)) + labs(size='Total Superfamily\nbase pairs')
    gyrawp=ggplot(mc[-1,], aes(x=gyraw.estimate, y=sup, color=sup, size=supbp)) + geom_vline(xintercept=0, lty='dashed', color='gray') + geom_point()+ scale_color_manual(values=dd.col)+ ylab('') + xlab('Effect on GYraw, per base pair')
    gyp=ggplot(mc[-1,], aes(x=gy.estimate, y=sup, color=sup, size=supbp)) + geom_vline(xintercept=0, lty='dashed', color='gray') + geom_point()+ scale_color_manual(values=dd.col)+ ylab('') + xlab('Effect on GY, per base pair')
    supunscaled=plot_grid(dtsp + theme(legend.position='NULL'), gyrawp+ theme(legend.position='NULL'), gyp+ theme(legend.position='NULL'), ncol=3, labels='AUTO')
      supunscaled
+   supsizelegend <- get_legend(dtsp)
               
    dtsfam=ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=umrCount/totalbp, color=sup)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point(size=0.5)
    gyfam=ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=umrCount/totalbp, color=sup)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point(size=0.5)
@@ -82,12 +83,13 @@ pdf(paste0('~/transfer/fig4_supAndFam.', Sys.Date(), '.pdf'),12,7)
    plot_grid(dtsfam + theme(legend.position='NULL'), gyrawfam+ theme(legend.position='NULL'), gyfam+ theme(legend.position='NULL'), ncol=3, labels='AUTO')
   
    ## gene dist
-   dtsfam=ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=meancoredist, color=sup, size=totalbp/26)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point()+ ylab('Average Distance to Gene') + xlab('Effect on DTS, per base pair')
+   dtsfam=ggplot(tefocusRR[-1,], aes(x=tefocusDTS, y=meancoredist, color=sup, size=totalbp/26)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point()+ ylab('Average Distance to Gene') + xlab('Effect on DTS, per base pair')+ guides( color='none', size=guide_legend(order=2)) + labs(size='Total Family\nbase pairs')
    gyfam=ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=meancoredist, color=sup, size=totalbp/26)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point()+ ylab('')+ xlab('Effect on GY, per base pair')
    gyrawfam=ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=meancoredist, color=sup, size=totalbp/26)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point()+ ylab('')+ xlab('Effect on GYraw, per base pair')
    genedistunscaled=plot_grid(dtsfam + theme(legend.position='NULL'), gyrawfam+ theme(legend.position='NULL'), gyfam+ theme(legend.position='NULL'), ncol=3, labels='AUTO')
   genedistunscaled
-              
+   famsizelegend <- get_legend(dtsfam)
+     
    dtsfam=ggplot(tefocusRR[-1,], aes(x=tefocusDTS*totalbp, y=meancoredist, color=sup)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point(size=0.5)
    gyfam=ggplot(tefocusRR[-1,], aes(x=tefocusGY*totalbp, y=meancoredist, color=sup)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point(size=0.5)
    gyrawfam=ggplot(tefocusRR[-1,], aes(x=tefocusGYraw*totalbp, y=meancoredist, color=sup)) +geom_vline(xintercept=0, color='gray', lty='dashed') +scale_y_log10() + scale_color_manual(values=dd.col) + geom_point( size=0.5)
@@ -114,9 +116,9 @@ telengthscaled=plot_grid(dtsfam + theme(legend.position='NULL'), gyrawfam+ theme
 
               
    plot_grid(supscaled, telengthscaled, ncol=1)
-   plot_grid(supunscaled, telengthunscaled, ncol=1)
-   plot_grid(supunscaled, genedistunscaled, ncol=1)
-   plot_grid(supunscaled, mingenedistunscaled, ncol=1)
+   plot_grid(supunscaled, supsizelegend, telengthunscaled, famsizelegend, ncol=2, rel_widths=c(1,0.2,1,0.2))
+   plot_grid(supunscaled, supsizelegend, genedistunscaled, famsizelegend, ncol=2, rel_widths=c(1,0.2,1,0.2))
+   plot_grid(supunscaled, supsizelegend, mingenedistunscaled, famsizelegend, ncol=2, rel_widths=c(1,0.2,1,0.2))
 dev.off()
          
               
