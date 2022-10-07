@@ -79,6 +79,27 @@ dev.off()
 saveRDS(legend, 'subpopulation_legend.RDS')
 
 
+gs$sizenam=factor(gs$nam, levels=arrange(parents, parents$genomesize)$nam)
+parents2=arrange(parents[-1,], parents$genomesize[-1])
+parents2$sizenam=factor(parents2$nam, levels=arrange(parents, parents$genomesize)$nam)
+## sort by genome size, plot in line for poster
+pdf('~/transfer/imputation_cshl.pdf', 20,2)
+lineTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~sizenam, strip.position='top', nrow=1) + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
+                             geom_point(data=parents2, aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents2, aes(label=sizenam), size=3, alpha=0.9, nudge_y = 100, nudge_x=-200, show.legend=F) + 
+                             ylab('Imputed TE\nContent (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='right', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+lineTE
+dev.off()
+
 ## supplement 1 is validation of genome size vs flow cyt
 ## compare parent imputed length to flow cytometry to pick which is best
 fc=read.table('../imputation/maize_flow_cytometry_chia.txt', header=T, sep='\t')
