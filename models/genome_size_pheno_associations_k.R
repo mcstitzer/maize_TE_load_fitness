@@ -79,3 +79,17 @@ DTSfit <- relmatLmer(DTS ~ tebp + nontebp + b73bp + (1|namRIL) ,
                             
 VarProp(DTSfit)
 
+
+
+## without b73
+GYfitb <- relmatLmer(GY ~ tebp + nontebp + (1|namRIL) ,
+                  data=teh[teh$namRIL %in% colnames(GYgrm),],
+                  relmat=list(namRIL=GYgrm))
+                  
+VarProp(GYfitb) ## prop is h2 of random effect of kinship  
+
+DTSfitb <- relmatLmer(DTS ~ tebp + nontebp + (1|namRIL) ,
+                  data=teh[teh$namRIL %in% colnames(DTSgrm),],
+                  relmat=list(namRIL=DTSgrm))
+                            
+VarProp(DTSfitb)
