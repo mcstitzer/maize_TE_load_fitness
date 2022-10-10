@@ -83,14 +83,14 @@ gs$sizenam=factor(gs$nam, levels=arrange(parents, parents$genomesize)$nam)
 parents2=arrange(parents[-1,], parents$genomesize[-1])
 parents2$sizenam=factor(parents2$nam, levels=arrange(parents, parents$genomesize)$nam)
 ## sort by genome size, plot in line for poster
-pdf('~/transfer/imputation_cshl.pdf', 20,2)
-lineTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~sizenam, strip.position='top', nrow=1) + 
+pdf('~/transfer/imputation_cshl.pdf', 15,3)
+lineTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~sizenam, strip.position='top', nrow=2) + 
 #                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
 #                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
 #                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
                              geom_point() +
                              geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
-                             geom_point(data=parents2, aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+                             geom_point(data=parents2, aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F, alpha=0.9) +
 #                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
                              geom_label_repel(data=parents2, aes(label=sizenam), size=3, alpha=0.9, nudge_y = 100, nudge_x=-200, show.legend=F) + 
                              ylab('Imputed TE\nContent (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
