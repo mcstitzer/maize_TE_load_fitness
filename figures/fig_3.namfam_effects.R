@@ -30,21 +30,28 @@ pahFam=pahFamOrig
 ## just genome size te and nonte
 pahFam=pahFamOrig[pahFamOrig$geno %in% c('tebp', 'genomesize'),]
 pahFam$label=factor(ifelse(pahFam$geno=='genomesize', 'Genome Size', 'TE Content'), levels=c('TE Content','Genome Size')) ## haah, first one goes at bottom because of 1,2 :)
-dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=gsEffect*1e6, y=label, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one Mb on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2)))
-gyEs=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=gsEffect*1e6, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one Mb on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2)))
-gyrawEs=ggplot(pahFam[pahFam$pheno=='GYraw',], aes(x=gsEffect*1e6, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one Mb on GY corrected for DTS (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2)))
+dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=gsEffect, y=label, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
+gyEs=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
+gyrawEs=ggplot(pahFam[pahFam$pheno=='GYraw',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY corrected for DTS (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
 
-plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO')
+#plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO')
+plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=3, labels='AUTO')
 legend <- get_legend(
   # create some space to the left of the legend
   ## also the nampal is subset 2:5 because we don't want NA, and we also don't have a popcorn in this data!!!!
-  ggplot(pahFam[pahFam$pheno %in% c('DTS', 'GY', 'GYraw'),], aes(x=gsEffect*1e6, y=geno, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal[2:5], na.translate=F)+ ylab('') + xlab('Effect of one Mb on PH (cm)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2)))
+  ggplot(pahFam[pahFam$pheno %in% c('DTS', 'GY', 'GYraw'),], aes(x=gsEffect, y=geno, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.3), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal[2:5], na.translate=F)+ ylab('') + xlab('Effect of one Mb on PH (cm)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2)))
  + theme(legend.box.margin = margin(0, 0, 0, 30)) + guides( alpha='none',  color= guide_legend(order = 1), size=guide_legend(order=2)) + labs(color='Subpopulation', size='R2')
 )
-plot_grid(plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+#plot_grid(plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
 
 dev.off()
 
+pdf(paste0('~/transfer/cshl_phenoeffects.', Sys.Date(), '.pdf'), 18,2.5)
+plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO')
+plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2), legend, ncol=2, rel_widths=c(1,0.2))
+
+dev.off()
 
 
 pdf(paste0('~/transfer/fig3_phenoeffects.explore.', Sys.Date(), '.pdf'), 14,8)
