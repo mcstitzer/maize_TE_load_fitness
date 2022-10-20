@@ -119,7 +119,15 @@ dd.col=tecolors[TESUPFACTORLEVELS]
    dtsfamlv=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
   gyfamlv=ggplot(ab[-1,], aes(x=estimatesgy, y=-log10(pvalsgy), color=sup, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
 
+   dtsfamlvs=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
+  gyfamlvs=ggplot(ab[-1,], aes(x=estimatesgy, y=-log10(pvalsgy), color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
 
+   dtsfamlvsl=ggplot(ab[-1,], aes(x=estimatesdts, y=meanlength, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('Average TE length')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
+  gyfamlvsl=ggplot(ab[-1,], aes(x=estimatesgy, y=meanlength, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5)))+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('Average TE length')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
+   dtsfamlvsd=ggplot(ab[-1,], aes(x=estimatesdts, y=meancoredist, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('Mean Core Gene Distance')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) + scale_y_log10()
+  gyfamlvsd=ggplot(ab[-1,], aes(x=estimatesgy, y=meancoredist, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5)))+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('Mean Core Gene Distance')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) + scale_y_log10()
+
+                       
 pdf('~/transfer/cshl_tewas.pdf', 6, 2.5)
 dtsfam
 gyfam
@@ -127,4 +135,13 @@ dtsfaml
 gyfaml
 dtsfamlv
 gyfamlv
+dtsfamlvs
+gyfamlvs
+dtsfamlvsl
+gyfamlvsl
+dtsfamlvsd
+gyfamlvsd
+                       
+ggplot(ab[-1,], aes(x=estimatesgy, y=estimatesdts, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307) & -log10(pvalsdts)>-log10(0.05/307), 1, 0.5)))+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('Effect of one bp on DTS (days)')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
+
 dev.off()
