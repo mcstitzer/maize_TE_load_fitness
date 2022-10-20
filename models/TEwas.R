@@ -107,7 +107,13 @@ tewas$meancoredist=gene$meancoredist[match(tewas$fam, gene$Name)]
 tewas$mincoredist=gene$mincoredist[match(tewas$fam, gene$Name)]
 
                        
-                       
+table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy>0,]$sup)
+table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy<0,]$sup)
+table(tewas[tewas$pvalsdts<(0.05/307) & tewas$estimatesdts>0,]$sup)
+table(tewas[tewas$pvalsdts<(0.05/307) & tewas$estimatesdts<0,]$sup)
+table(tewas$estimatesgy[tewas$pvalsgy<(0.05/307)]>0 )
+table(tewas$estimatesdts[tewas$pvalsdts<(0.05/307)]>0 )
+                      
 ab=tewas
 dd.col=tecolors[TESUPFACTORLEVELS]
    dtsfam=ggplot(ab[-1,], aes(x=meancoredist, y=-log10(pvalsdts), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Average Distance to Gene') + scale_x_log10() + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
