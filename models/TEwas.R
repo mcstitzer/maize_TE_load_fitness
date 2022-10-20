@@ -1,40 +1,63 @@
+library(stringr)
+library(dplyr)
+library(lme4)
+library(lme4qtl)
+library(ggplot2)
+library(cowplot)
+theme_set(theme_cowplot())
+library(plyr)
+library(glmnet)
+library(glmnetUtils)
+library(RColorBrewer)
 
-## from ridge regression
+source('../figures/color_palette.R')
+namfams=read.table('../figures/nam_fams.txt')
+
+sk=read.table('../imputation/SampleToKeep.txt')
+
+
+## check imputation to get tecounts object... i'm being lazy
+
+p=read.csv('../phenotypes/all_NAM_phenos.csv')
+h=read.csv('../phenotypes/BLUEs.csv')
+
+h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
+
+hp=readRDS('../phenotypes/NAM_H-pheno.rds')
+hp$genotype=rownames(hp)
+hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
+
+## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
+h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
+
+fams=read.table('../imputation/ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+
+fams$namRIL=substr(fams$RIL,1,9)
+fams$namFamily=substr(fams$RIL,1,4)
+
+fams$nam=namfams$V2[match(fams$namFamily, namfams$V1)]
+fams$subpop=nam$subpop[match(toupper(fams$nam), toupper(nam$genome))]
+fams$subpop[fams$subpop=='B73']=NA
+
+fams$keep=fams$RIL %in% sk$V1
+
+
+## these generate data frame with single measurment per ril, from the conservative keep list from cinta
+teh=merge(fams[fams$keep,], h[,-c(1)], by.x='namRIL', by.y='ID')
+
+
+
+## from ridge regression, each fam
 fteh=teh
+
+
 ## regular teh
+teh=read.table('geno_pheno_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
+
 ateh=merge(fteh, teh)
 
-runAssnH=function(genocol, famSpecific=F){ ## will return df with pheno col (GY, PH, DTS), geno, intercept, effect, r2, pval
-  if(famSpecific==F){
-  pah=data.frame(pheno=c('DTS', 'PH', 'GY', 'GYraw'), geno=genocol)
-  pah$intercept=sapply(pah$pheno, function(x) coef(lm(teh[,x]~teh[,genocol]))[1])
-  pah$gsEffect=sapply(pah$pheno, function(x) coef(lm(teh[,x]~teh[,genocol]))[2])
-  pah$r2=sapply(pah$pheno, function(x) summary(lm(teh[,x]~teh[,genocol]))$r.squared)
-  pah$pval=sapply(pah$pheno, function(x) summary(lm(teh[,x]~teh[,genocol]))$coefficients[2,4])
-  return(pah)
-  }
-  if(famSpecific==T){
-    tmpList=lapply(unique(teh$nam), function(nam){ ## for each nam
-      pah=data.frame(pheno=c('DTS', 'PH', 'GY', 'GYraw'), geno=genocol, nam=nam, intercept=NA, gsEffect=NA, r2=NA, pval=NA)
-      for(ip in 1:nrow(pah)){ ## for each pheno
-        if(sum(!is.na(teh[teh$nam==nam,pah$pheno[ip]]))>0){
-          mod=lm(teh[teh$nam==nam,pah$pheno[ip]]~teh[,genocol][teh$nam==nam])
-          pah$intercept[ip]=sapply(pah$pheno, function(x) coef(mod)[1])
-          pah$gsEffect[ip]=sapply(pah$pheno, function(x) coef(mod)[2])
-          pah$r2[ip]=sapply(pah$pheno, function(x) summary(mod)$r.squared)
-          pah$pval[ip]=sapply(pah$pheno, function(x) summary(mod)$coefficients[2,4])
-          }
-       }
-       return(pah)
-       }
-       )
-       return(do.call('rbind', tmpList))
-  
-}}
-
-
-afgy=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$GY~ateh[,x] + ateh$tebp + ateh$nontebp)))
-afdts=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$DTS~ateh[,x] + ateh$tebp + ateh$nontebp)))
+afgy=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$GY~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
+afdts=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$DTS~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
 
 estimatesgy=unlist(lapply(afgy, function(x) x[2,2]))
 pvalsgy=unlist(lapply(afgy, function(x) x[2,5]))
@@ -44,6 +67,21 @@ pvalsdts=unlist(lapply(afdts, function(x) x[2,5]))
 tewas=data.frame(fam=colnames(fteh)[3:308], estimatesgy=estimatesgy, pvalsgy=pvalsgy, estimatesdts=estimatesdts, pvalsdts=pvalsdts)
 
 
+                       
+mbTEs=read.table('../imputation/TE_content_across_NAM_genotypes_by_fam.2022-08-08.txt', header=T)
+mbTEs$Name=gsub('_LTR', '', gsub('_INT', '', mbTEs$Name))
+tewas$Classification=mbTEs$Classification[match(tewas$fam, mbTEs$Name)]
+tewas$totalbp=mbTEs$bp[match(tewas$fam, mbTEs$Name)]
+
+tewas$superfam=str_split_fixed(tewas$Classification, '/', 2)[,2]
+tewas$superfam[tewas$superfam%in%c('CRM','Gypsy')]='RLG'
+tewas$sup=tewas$superfam
+tewas$sup[tewas$sup=='Copia']='RLC'
+tewas$sup[tewas$sup=='Helitron']='DHH'
+tewas$sup[tewas$sup=='L1']='RIL'
+tewas$sup[tewas$sup=='unknown']='RLX'
+                                                                                            
+                       
 ## x length, dist to gene
 ## y neg log10 pvalue - bonforonni at 0.000162
 
@@ -51,9 +89,26 @@ tewas=data.frame(fam=colnames(fteh)[3:308], estimatesgy=estimatesgy, pvalsgy=pva
 
 TESUPFACTORLEVELS=c('DHH', 'DTA', 'DTC', 'DTH', 'DTM', 'DTT', 'DTX', 'RLC', 'RLG', 'RLX', 'RIL', 'RIT', 'RST')        
 
-ab=merge(tefocusRR, tewas, by.x='term', by.y='fam')
 
-ab$sup=factor(ab$sup, levels=TESUPFACTORLEVELS)
+tewas$sup=factor(tewas$sup, levels=TESUPFACTORLEVELS)
+                       
+                       
+                       
+
+len=read.table('../te_summaries/te_lengths_NAM.txt', header=T)
+umr=read.table('../te_summaries/te_umr_NAM.txt', header=T)
+gene=read.table('../te_summaries/te_fam_gene_dist_B73.txt', header=T)
+
+tewas$meanlength=len$meanlength[match(tewas$fam, len$Name)]
+tewas$umrCount=umr$umrCount[match(tewas$fam, umr$Name)]
+tewas$umrCount[is.na(tewas$umrCount)]=0
+tewas$meangenedist=gene$meangenedist[match(tewas$fam, gene$Name)]
+tewas$meancoredist=gene$meancoredist[match(tewas$fam, gene$Name)]
+tewas$mincoredist=gene$mincoredist[match(tewas$fam, gene$Name)]
+
+                       
+                       
+ab=tewas
 dd.col=tecolors[TESUPFACTORLEVELS]
    dtsfam=ggplot(ab[-1,], aes(x=meancoredist, y=-log10(pvalsdts), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Average Distance to Gene') + scale_x_log10() + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
   gyfam=ggplot(ab[-1,], aes(x=meancoredist, y=-log10(pvalsgy), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Average Distance to Gene') + scale_x_log10() + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
@@ -61,7 +116,7 @@ dd.col=tecolors[TESUPFACTORLEVELS]
    dtsfaml=ggplot(ab[-1,], aes(x=meanlength, y=-log10(pvalsdts), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Average TE Length') + scale_x_log10() + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
   gyfaml=ggplot(ab[-1,], aes(x=meanlength, y=-log10(pvalsgy), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Average TE Length') + scale_x_log10() + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
 
-   dtsfamlv=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup)) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') 
+   dtsfamlv=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
   gyfamlv=ggplot(ab[-1,], aes(x=estimatesgy, y=-log10(pvalsgy), color=sup, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
 
 
