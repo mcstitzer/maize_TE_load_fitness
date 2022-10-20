@@ -26,9 +26,9 @@ gene=import.gff('../genomes_and_annotations/genes/Zm-B73-REFERENCE-NAM-5.0_Zm000
 
 
   tem$genedist=NA
-  tem$genedist[queryHits(distanceToNearest(tem, nontandemcore))]=mcols(distanceToNearest(tem, nontandemcore))$distance
+  tem$genedist[queryHits(distanceToNearest(tem, nontandemcore))]=mcols(distanceToNearest(tem, nontandemcore, ignore.strand=T))$distance
   tem$coredist=NA
-  tem$coredist[queryHits(distanceToNearest(tem, c(nontandemcore,coreregions)))]=mcols(distanceToNearest(tem, c(nontandemcore, coreregions)))$distance
+  tem$coredist[queryHits(distanceToNearest(tem, c(nontandemcore,coreregions)))]=mcols(distanceToNearest(tem, c(nontandemcore, coreregions), ignore.strand=T))$distance
 
 tem$Name=gsub('_LTR', '', gsub('_INT', '', tem$Name))
 tem$Identity=as.numeric(tem$Identity)
