@@ -68,6 +68,9 @@ genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$gen
                 geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL')
 tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
                 geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+nontebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=nontebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$nontebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed non-TE Genome Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=nontebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$nontebp[-1])])+ theme(legend.position='NULL')
+
 
 legend <- get_legend(famTE)
 
