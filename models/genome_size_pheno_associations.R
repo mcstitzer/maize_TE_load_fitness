@@ -139,3 +139,46 @@ write.table(pahPFDF, paste0('lm_output_mphenos.namFamily.greaterthan',b73Correct
 write.table(teh, paste0('geno_pheno_gphenos.greaterthan',b73CorrectNumber, 'b73correct.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 write.table(tep, paste0('geno_pheno_mphenos.greaterthan',b73CorrectNumber, 'b73correct.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 }
+
+                 
+                 
+teh$nontenonrepeatbp=teh$nontebp-teh$allknobbp-teh$centromerebp-teh$telomerebp-teh$ribosomalbp
+                 
+mDTS=lm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
+mGY=lm(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
+                 
+summary(mDTS)
+summary(mGY)
+                 
+                 
+mDTSn=lmer(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
+mGYn=lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
+                 
+summary(mDTSn)
+summary(mGYn)
+                 
+library(rstanarm)
+
+model <- stan_glm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh, refresh = 0)
+sjstats::r2(model)
+model <- stan_lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp + (1|nam), data=teh, refresh = 0)
+
+sjstats::r2(model)
+
+                 
+pdf('~/transfer/full_bayes.pdf', 14,8)
+result=estimate_density(model)
+
+plot(result)
+plot(result, stack=F)
+plot(result, stack=F, priors=T)
+result=describe_posterior(model)
+plot(result)
+
+result=p_direction(model)
+plot(result)                 
+dev.off()
+                 
+                 
+                 
+                 
