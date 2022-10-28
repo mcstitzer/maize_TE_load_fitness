@@ -59,14 +59,25 @@ ateh=merge(fteh, teh)
 afgy=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$GY~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
 afdts=lapply(colnames(fteh)[3:308], function(x) broom::tidy(lm(ateh$DTS~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
 
+r2gym=lapply(colnames(fteh)[3:308], function(x) broom::glance(lm(ateh$GY~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
+r2dtsm=lapply(colnames(fteh)[3:308], function(x) broom::glance(lm(ateh$DTS~ateh[,x] + (ateh$tebp-ateh[,x]) + ateh$nontebp)))
+
 estimatesgy=unlist(lapply(afgy, function(x) x[2,2]))
 pvalsgy=unlist(lapply(afgy, function(x) x[2,5]))
 estimatesdts=unlist(lapply(afdts, function(x) x[2,2]))
 pvalsdts=unlist(lapply(afdts, function(x) x[2,5]))
+r2dts=unlist(lapply(r2dtsm, function(x) x[1,1]))
+r2gy=unlist(lapply(r2gym, function(x) x[1,1]))
 
-tewas=data.frame(fam=colnames(fteh)[3:308], estimatesgy=estimatesgy, pvalsgy=pvalsgy, estimatesdts=estimatesdts, pvalsdts=pvalsdts)
+tewas=data.frame(fam=colnames(fteh)[3:308], estimatesgy=estimatesgy, pvalsgy=pvalsgy, r2gy=r2gy, estimatesdts=estimatesdts, pvalsdts=pvalsdts, r2dts=r2dts)
 
+## all in one model, don't double count residual variance from allTE
+atteh=merge(fteh[,3:308], teh[,c('GY','tebp', 'nontebp')])
+atteh$tebp=atteh$tebp-rowSums(fteh[,3:308])
+alltogether=lm(GY~., data=atteh)
 
+                       
+                       
                        
 mbTEs=read.table('../imputation/TE_content_across_NAM_genotypes_by_fam.2022-08-08.txt', header=T)
 mbTEs$Name=gsub('_LTR', '', gsub('_INT', '', mbTEs$Name))
@@ -125,6 +136,12 @@ dd.col=tecolors[TESUPFACTORLEVELS]
    dtsfamlv=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
   gyfamlv=ggplot(ab[-1,], aes(x=estimatesgy, y=-log10(pvalsgy), color=sup, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
 
+   r2basedts=broom::glance(lm(ateh$DTS~ateh$tebp + ateh$nontebp))[1,1]
+   r2basegy=broom::glance(lm(ateh$GY~ateh$tebp + ateh$nontebp))[1,1]
+dtsfamlvr2=ggplot(ab[-1,], aes(x=estimatesdts, y=r2dts, color=sup, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=unlist(r2basedts), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('R2 of model with this TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
+  gyfamlvr2=ggplot(ab[-1,], aes(x=estimatesgy, y=r2gy, color=sup, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=unlist(r2basegy), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('R2 of model with this TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
+
+                   
    dtsfamlvs=ggplot(ab[-1,], aes(x=estimatesdts, y=-log10(pvalsdts), color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsdts)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on DTS') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
   gyfamlvs=ggplot(ab[-1,], aes(x=estimatesgy, y=-log10(pvalsgy), color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307), 1, 0.5))) +geom_hline(yintercept=-log10(0.05/307), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('-log10(p) of TE family')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2)) 
 
@@ -141,6 +158,8 @@ dtsfaml
 gyfaml
 dtsfamlv
 gyfamlv
+dtsfamlvr2
+gyfamlvr2
 dtsfamlvs
 gyfamlvs
 dtsfamlvsl
