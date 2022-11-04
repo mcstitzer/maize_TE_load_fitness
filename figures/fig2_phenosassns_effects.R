@@ -18,7 +18,7 @@ pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## als
 legend=readRDS('subpopulation_legend.RDS')
 
 
-pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 15,8)
+pdf(paste0('~/transfer/fig2_phenoassns.', Sys.Date(), '.pdf'), 10,4)
 
 dts=ggplot(teh, aes(x=genomesize/1e6, y=DTS, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Days to Silking (BLUE, days)') + xlab('Imputed genome size (Mbp)') +
            annotate("text",  x=Inf, y = Inf, label = paste0(
@@ -46,7 +46,8 @@ ph=ggplot(teh, aes(x=genomesize/1e6, y=PH, color=subpop))+ geom_point(alpha=0.7)
              '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='PH'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
 genomesize=plot_grid(dts, gyraw, gy, ncol=3, labels='AUTO')
-                             
+genomesize2=plot_grid(dts, gy, ncol=2, labels='AUTO')
+                            
 dtst=ggplot(teh, aes(x=tebp/1e6, y=DTS, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Days to Silking (BLUE, days)')+xlab('Imputed TE content (Mbp)')+
            annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='DTS']*1e6, digits=2), '\n',
@@ -73,11 +74,13 @@ pht=ggplot(teh, aes(x=tebp/1e6, y=PH, color=subpop)) + geom_point(alpha=0.7) + s
              '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='PH'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
 tecontent=plot_grid(dtst, gyrawt, gyt, ncol=3, labels=c('D', 'E', 'F'))
+tecontent2=plot_grid(dtst, gyt, ncol=2, labels='AUTO')
 
 plot_grid(genomesize, tecontent, ncol=1)
 
 
 plot_grid(plot_grid(genomesize, tecontent, ncol=1), legend, rel_widths=c(1,0.2))
+plot_grid(tecontent2, legend, rel_widths=c(1,0.2))
 
 
 
