@@ -25,7 +25,7 @@ pahFam$subpop=nam$subpop[match(pahFam$nam, nam$genome)]
 pahFamOrig=pahFam
 
 
-pdf(paste0('~/transfer/fig3_phenoeffects.', Sys.Date(), '.pdf'), 15,3)
+pdf(paste0('~/transfer/fig3_phenoeffects.', Sys.Date(), '.pdf'), 13,3)
 pahFam=pahFamOrig
 ## just genome size te and nonte
 pahFam=pahFamOrig[pahFamOrig$geno %in% c('tebp', 'genomesize'),]
@@ -35,7 +35,7 @@ gyEs=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=gsEffect, y=label, col=subpop, al
 gyrawEs=ggplot(pahFam[pahFam$pheno=='GYraw',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY corrected for DTS (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
 
 #plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO')
-plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=3, labels='AUTO')
+plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO')
 legend <- get_legend(
   # create some space to the left of the legend
   ## also the nampal is subset 2:5 because we don't want NA, and we also don't have a popcorn in this data!!!!
