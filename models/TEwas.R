@@ -72,7 +72,7 @@ r2gy=unlist(lapply(r2gym, function(x) x[1,1]))
 tewas=data.frame(fam=colnames(fteh)[3:308], estimatesgy=estimatesgy, pvalsgy=pvalsgy, r2gy=r2gy, estimatesdts=estimatesdts, pvalsdts=pvalsdts, r2dts=r2dts)
 
 ## all in one model, don't double count residual variance from allTE
-atteh=merge(fteh[,3:308], teh[,c('GY','tebp', 'nontebp')])
+atteh=cbind(fteh[,3:308], teh[,c('GY','tebp', 'nontebp', 'b73bp')])
 atteh$tebp=atteh$tebp-rowSums(fteh[,3:308])
 alltogether=lm(GY~., data=atteh)
 
