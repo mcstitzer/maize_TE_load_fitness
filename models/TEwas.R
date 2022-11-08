@@ -139,6 +139,16 @@ bm$meangenedist=gene$meangenedist[match(bm$term, gene$Name)]
 bm$meancoredist=gene$meancoredist[match(bm$term, gene$Name)]
 bm$mincoredist=gene$mincoredist[match(bm$term, gene$Name)]
                  
+bm$Classification=mbTEs$Classification[match(bm$term, mbTEs$Name)]
+bm$totalbp=mbTEs$bp[match(bm$term, mbTEs$Name)]
+
+bm$superfam=str_split_fixed(bm$Classification, '/', 2)[,2]
+bm$superfam[bm$superfam%in%c('CRM','Gypsy')]='RLG'
+bm$sup=bm$superfam
+bm$sup[bm$sup=='Copia']='RLC'
+bm$sup[bm$sup=='Helitron']='DHH'
+bm$sup[bm$sup=='L1']='RIL'
+bm$sup[bm$sup=='unknown']='RLX'
                    
 table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy>0,]$sup)
 table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy<0,]$sup)
@@ -191,4 +201,19 @@ gyfamlvsd
                        
 ggplot(ab[-1,], aes(x=estimatesgy, y=estimatesdts, color=sup, size=totalbp/26, alpha=ifelse(-log10(pvalsgy)>-log10(0.05/307) & -log10(pvalsdts)>-log10(0.05/307), 1, 0.5)))+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('Effect of one bp on DTS (days)')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
 
+dev.off()
+                   
+                   
+                   
+                   
+                   
+                   
+                   
+pdf('~/transfer/new_tewas.pdf', 6, 2.5)
+ab=bm
+ggplot(ab[-1,], aes(x=gy_estimate, y=-log10(gy_p.value), color=sup, size=bpTEs/26, alpha=ifelse(gy_p.value<0.05, 1, 0.5))) + geom_hline(yintercept=-log10(0.05), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()
+ggplot(ab[-1,], aes(x=dts_estimate, y=-log10(dts_p.value), color=sup, size=bpTEs/26, alpha=ifelse(dts_p.value<0.05, 1, 0.5))) + geom_hline(yintercept=-log10(0.05), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()
+ggplot(ab[-1,], aes(x=gy_estimate, y=-log10(gy_p.value), color=sup, alpha=ifelse(gy_p.value<0.05, 1, 0.5))) + geom_hline(yintercept=-log10(0.05), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()
+ggplot(ab[-1,], aes(x=dts_estimate, y=-log10(dts_p.value), color=sup, alpha=ifelse(dts_p.value<0.05, 1, 0.5))) + geom_hline(yintercept=-log10(0.05), color='gray', lty='dashed')+geom_vline(xintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()
+ggplot(ab[-1,], aes(x=gy_estimate, y=dts_estimate, color=sup, size=bpTEs/26, alpha=ifelse((gy_p.value < 0.05 & dts_p.value < 0.05), 1, 0.5)))+geom_vline(xintercept=0, color='gray', lty='dashed')+geom_hline(yintercept=0, color='gray', lty='dashed') + scale_color_manual(values=dd.col) + geom_point()+ xlab('Effect of one bp on GY (t/ha)') + ylab('Effect of one bp on DTS (days)')+ labs( color='Superfamily') + guides(alpha='none', color=guide_legend(ncol=2))
 dev.off()
