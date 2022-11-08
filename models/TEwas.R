@@ -76,8 +76,22 @@ atteh=cbind(fteh[,3:308], teh[,c('GY','tebp', 'nontebp', 'b73bp')])
 atteh$tebp=atteh$tebp-rowSums(fteh[,3:308])
 alltogether=lm(GY~., data=atteh)
 
-                       
-                       
+
+## all in one model, don't double count residual variance from allTE
+fatteh=cbind(fteh[,3:308], teh[,c('DTS','tebp', 'nontebp', 'b73bp')])
+fatteh$tebp=fatteh$tebp-rowSums(fteh[,3:308])
+falltogether=lm(DTS~., data=fatteh)
+
+## all all in one model, don't double count residual variance from allTE
+afatteh=cbind(fteh[,3:308], teh[,c('GY', 'DTS','tebp', 'nontebp', 'b73bp')])
+afatteh$tebp=afatteh$tebp-rowSums(fteh[,3:308])
+afalltogether=lm(DTS~., data=afatteh)
+aalltogether=lm(GY~., data=afatteh)
+
+                   
+bm=cbind(broom::tidy(alltogether), broom::tidy(falltogether)[,-1])
+names(bm)[2:5]=paste0('gy_', names(bm))[2:5]
+names(bm)[6:9]=paste0('dts_', names(bm))[6:9]                     
                        
 mbTEs=read.table('../imputation/TE_content_across_NAM_genotypes_by_fam.2022-08-08.txt', header=T)
 mbTEs$Name=gsub('_LTR', '', gsub('_INT', '', mbTEs$Name))
@@ -117,7 +131,15 @@ tewas$meangenedist=gene$meangenedist[match(tewas$fam, gene$Name)]
 tewas$meancoredist=gene$meancoredist[match(tewas$fam, gene$Name)]
 tewas$mincoredist=gene$mincoredist[match(tewas$fam, gene$Name)]
 
-                       
+bm$bpTEs=mbTEs$bp[match(bm$term, mbTEs$Name)]
+bm$meanlength=len$meanlength[match(bm$term, len$Name)]
+bm$umrCount=umr$umrCount[match(bm$term, umr$Name)]
+bm$umrCount[is.na(bm$umrCount)]=0
+bm$meangenedist=gene$meangenedist[match(bm$term, gene$Name)]
+bm$meancoredist=gene$meancoredist[match(bm$term, gene$Name)]
+bm$mincoredist=gene$mincoredist[match(bm$term, gene$Name)]
+                 
+                   
 table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy>0,]$sup)
 table(tewas[tewas$pvalsgy<(0.05/307) & tewas$estimatesgy<0,]$sup)
 table(tewas[tewas$pvalsdts<(0.05/307) & tewas$estimatesdts>0,]$sup)
