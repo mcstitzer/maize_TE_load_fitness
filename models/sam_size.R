@@ -27,8 +27,7 @@ gs$threesd=abs(gs$mean-gs$genomesize)/gs$sd >3
 gs$foursd=abs(gs$mean-gs$genomesize)/gs$sd >4
 gs=gs[!gs$threesd,]
 ## need to redo this part and it's a pain...
-parents=read.table('../imputation/parent_bp_repeatsgreaterthan22B73correct.2022-09-16.txt', he
-ader=T)
+parents=read.table('../imputation/parent_bp_repeatsgreaterthan22B73correct.2022-09-16.txt', header=T)
 parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$id, '_', 2)[,1]), toupper(namfams$V2))]
 parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
 parents$subpop[parents$subpop=='B73']=NA
@@ -37,7 +36,7 @@ parents$subpop[parents$subpop=='B73']=NA
 GSminmax=c(min(c(gs$genomesize, parents$genomesize)), max(c(gs$genomesize, parents$genomesize)))/1e6
 TEminmax=c(min(c(gs$tebp, parents$tebp)), max(c(gs$tebp, parents$tebp))+25*1e6)/1e6 ## bump up te max so that labels don't overlap??
 head(gs)
-cs=read.table('thompson2015_sammeans_rils_tables8.txt', header=T)
+cs=read.table('../phenotypes/thompson2015_sammeans_rils_tables8.txt', header=T)
 
 
 cs$nam=paste0(ifelse(substr(cs$line,1,1)=='Z', ifelse(substr(cs$line,1,2)=='Z2', 'Z024', 'Z005'), NA), 'E', str_pad(gsub('E', '', str_split_fixed(cs$line, '-', 2)[,2]), 4, side='left', pad=0))
@@ -65,6 +64,44 @@ cor.test(gs$SAM_arc.length, gs$tebp, use='complete.obs')
 cor.test(gs$SAM_midpoint.width, gs$tebp, use='complete.obs')
 cor.test(gs$SAM_volume, gs$tebp, use='complete.obs')
 
+csp=read.table('../phenotypes/thompson2015_cellsize_means_tables6.txt', header=T)
+csp$match=toupper(csp$line)
+parents$match=toupper(parents$nam)
+parents$match[1]='B73'
+parentsCS=merge(csp, parents, by='match')
 
 
 
+p=read.csv('../phenotypes/all_NAM_phenos.csv')
+h=read.csv('../phenotypes/BLUEs.csv')
+
+h$ID=str_split_fixed(h$genotype, '/', 2)[,1] ## pull off the PHZ51 tester
+
+hp=readRDS('../phenotypes/NAM_H-pheno.rds')
+hp$genotype=rownames(hp)
+hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
+
+## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
+h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
+
+
+pdf('~/transfer/sam_cells.pdf')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=genomesize, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=tebp, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=nontebp, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+
+ggplot(gs[!is.na(gs$SAM_volume),], aes(x=genomesize, y=SAM_volume, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_volume),], aes(x=tebp, y=SAM_volume, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_volume),], aes(x=nontebp, y=SAM_volume, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+
+
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=GY, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=DTS, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=GY, y=SAM_height, group=namFamily, color=genomesize)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=DTS, y=SAM_height, group=namFamily, color=genomesize)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=GY, y=SAM_height, group=namFamily, color=tebp)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+ggplot(gs[!is.na(gs$SAM_height),], aes(x=DTS, y=SAM_height, group=namFamily, color=tebp)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
+
+dev.off()
