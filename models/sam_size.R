@@ -104,4 +104,9 @@ ggplot(gs[!is.na(gs$SAM_height),], aes(x=DTS, y=SAM_height, group=namFamily, col
 ggplot(gs[!is.na(gs$SAM_height),], aes(x=GY, y=SAM_height, group=namFamily, color=tebp)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
 ggplot(gs[!is.na(gs$SAM_height),], aes(x=DTS, y=SAM_height, group=namFamily, color=tebp)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
 
+
+ggplot(parentsCS, aes(x=tebp, y=SAM_height, label=line)) + geom_text()
+
+
+ggplot(parentsCS, aes(x=tebp, y=SAM_height, label=line)) + geom_point() + stat_smooth(method='lm')
 dev.off()
