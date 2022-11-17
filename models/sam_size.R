@@ -84,6 +84,8 @@ hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
 ## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
 h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
 
+gs$GY=h$GY[match(gs$namRIL, h$ID)]
+gs$DTS=h$DTS[match(gs$namRIL, h$ID)]
 
 pdf('~/transfer/sam_cells.pdf')
 ggplot(gs[!is.na(gs$SAM_height),], aes(x=genomesize, y=SAM_height, group=namFamily)) + geom_point() + facet_wrap(~namFamily) + stat_smooth(method='lm')
