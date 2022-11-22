@@ -222,3 +222,40 @@ ggplot(lsvn, aes(x=length, y=NAMcorr, color=subpop, label=genome)) + geom_text()
                     
 dev.off()
 
+### explore each family
+                    
+gs=read.table('../imputation/ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+parents=read.table('parent_TEFam_bp_repeats.2022-11-22.txt', header=T)
+parents=read.table('parent_TEFam_bp_repeats.2022-11-22.txt', header=T)
+source('../figures/color_palette.R')
+namfams=read.table('../figures/nam_fams.txt')
+sk=read.table('../imputation/SampleToKeep.txt')
+parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$id, '_', 2)[,1]), toupper(namfams$V2))]
+parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
+parents$subpop[parents$subpop=='B73']=NA
+gs$namRIL=substr(gs$RIL, 1,9)
+gs$namFamily=substr(gs$id,1,4)
+gs$nam=namfams$V2[match(gs$namFamily, namfams$V1)]
+gs$subpop=nam$subpop[match(toupper(gs$nam), toupper(nam$genome))]
+gs$subpop[gs$subpop=='B73']=NA
+gs$namFamily=substr(gs$RIL,1,4)
+gs$nam=namfams$V2[match(gs$namFamily, namfams$V1)]
+gs$subpop=nam$subpop[match(toupper(gs$nam), toupper(nam$genome))]
+gs$subpop[gs$subpop=='B73']=NA
+gs=gs[gs$RIL %in% sk$V1,]
+
+pdf('~/transfer/fam_imputation_range.pdf',10,8)
+for(fam in colnames(gs)[2:307]){
+minmax=c(min(c(gs[,fam], parents[,fam])), max(c(gs[,fam], parents[,fam])))
+specgs=gs
+specgs$nam=factor(gs$nam, levels=parents$nam[-1][order(parents[-1,fam])])
+print(ggplot(specgs, aes_string(y='nam', x=fam, color='subpop')) +  geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents[1,fam]), lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Mbp)') + ylab('NAM Family') + geom_point(data=parents[-1,], aes_string(x=fam, y='nam', fill='subpop'), shape=21, col='black', size=2) + theme(legend.position='NULL') + ggtitle(fam))
+}
+dev.off()
+
+
+                    
+                    
+                    
+                    
+                    
