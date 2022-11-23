@@ -230,11 +230,11 @@ parents=read.table('parent_TEFam_bp_repeats.2022-11-22.txt', header=T)
 source('../figures/color_palette.R')
 namfams=read.table('../figures/nam_fams.txt')
 sk=read.table('../imputation/SampleToKeep.txt')
-parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$id, '_', 2)[,1]), toupper(namfams$V2))]
+parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$RIL, '_', 2)[,1]), toupper(namfams$V2))]
 parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
 parents$subpop[parents$subpop=='B73']=NA
 gs$namRIL=substr(gs$RIL, 1,9)
-gs$namFamily=substr(gs$id,1,4)
+gs$namFamily=substr(gs$RIL,1,4)
 gs$nam=namfams$V2[match(gs$namFamily, namfams$V1)]
 gs$subpop=nam$subpop[match(toupper(gs$nam), toupper(nam$genome))]
 gs$subpop[gs$subpop=='B73']=NA
@@ -253,6 +253,26 @@ print(ggplot(specgs, aes_string(y='nam', x=fam, color='subpop')) +  geom_jitter(
 }
 dev.off()
 
+pm=cbind(sapply(2:26, function(x) (parents[x,-c(1,308,309)]+parents[1,-c(1,308,309)])/2))
+pmm=cbind(data.frame(id=parents$nam[-1]), t(pm))
+rmm=gs %>% group_by(nam) %>% summarize_at(2:307, mean)
+## scale to b73 value
+scaled_midparentdev=data.frame(sapply(colnames(rmm)[-1], function(x) rmm[,x]-as.numeric(pmm[,x])))/unlist(rmm[1,-1])
+rownames(scaled_midparentdev)=rmm$nam
+                                      
+unscaled_midparentdev=data.frame(sapply(colnames(rmm)[-1], function(x) rmm[,x]-as.numeric(pmm[,x])))
+rownames(unscaled_midparentdev)=rmm$nam
+
+pdf('~/transfer/midparent_copynumber_heatmap.pdf', 30,20)
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=F)
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=T)
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=F)
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=T)
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=F)
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=T)
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=F)
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=T)
+dev.off()
 
                     
                     
