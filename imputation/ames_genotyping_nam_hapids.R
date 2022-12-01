@@ -142,4 +142,5 @@ rilsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(
                      b73rr=rowSums(b73mat[,colnames(b73mat) %in% paste0(KEEPb73)],na.rm=T))
             print(paste0('so now done with ', minB73correct))
             head(rilsumKeep)
+              rilsumKeep$nam=str_split_fixed(rilsumKeep$id, '-', 2)[,1]
 write.table(rilsumKeep, paste0('ames_bp_repeats.greaterthan', minB73correct, 'B73correct.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
