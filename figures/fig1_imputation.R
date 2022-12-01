@@ -264,14 +264,14 @@ unscaled_midparentdev=data.frame(sapply(colnames(rmm)[-1], function(x) rmm[,x]-a
 rownames(unscaled_midparentdev)=rmm$nam
 
 pdf('~/transfer/midparent_copynumber_heatmap.pdf', 30,20)
-pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=F)
-pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=T)
-pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=F)
-pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=T)
-pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=F)
-pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=T)
-pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=F)
-pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=T)
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=F, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=T, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=F, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=T, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=F, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=T, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=F, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=T, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
 dev.off()
 
                     
