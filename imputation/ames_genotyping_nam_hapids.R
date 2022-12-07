@@ -1,3 +1,22 @@
+## change java memory before starting java
+
+options(java.parameters = c("-XX:+UseConcMarkSweepGC", "-Xmx48g", "-Xms48g"))
+gc()
+#options(java.parameters = c("-Xmx48g", "-Xms48g"))
+
+
+
+library(rtracklayer)
+library(ggplot2)
+library(cowplot)
+theme_set(theme_cowplot())
+library(data.table)
+library(dplyr)
+library(stringr)
+
+
+
+library(rPHG)
 
 
 
@@ -5,6 +24,11 @@
 ## use Ames genotyping to pull out B73 replicates
 amesMethod <- "Ames_NonMergedReadMapping_AllLines_Haploid" ## there are several B73's - this will hopefully ask if they show differences from refgen
 nam=read.table('../figures/nam_fams.txt')
+
+myCon <- rPHG::BrapiCon("cbsudc01.biohpc.cornell.edu")
+myCon
+
+myCon %>% rPHG::availablePHGMethods() ## need to pick a method
 
 
 ## pull out all NAM parents
@@ -35,7 +59,9 @@ all.haps=ames.haps
 ## this is the values for each haplotype of how many TEs there are
 atorrm=read.table('allNAM_hapids.TEbpUpdate.sup.2022-08-30.txt', header=T, comment.char='')
 
-
+all.haps.namname=str_split_fixed(rownames(all.haps), '-', 2)[,1]
+## count per sample how many "self" refranges are called
+selfmat=sapply(1:ncol(all.haps), function(x) toupper(atorrm$genotype[match(all.haps[,x], atorrm$hapid)])==toupper(all.haps.namname))
 
 
 gsmat=sapply(1:ncol(all.haps), function(x) atorrm$hapwidth[match(all.haps[,x], atorrm$hapid)])
@@ -63,6 +89,7 @@ b73mat=sapply(1:ncol(all.haps), function(x) all.haps[,x] %in% atorrm$hapid[atorr
 ## can get this one from subsetting gsmat by b73 mat, I HOPE
 #b73bpmat=sapply(1:ncol(all.haps), function(x) all.haps[,x] %in% atorrm$hapid[atorrm$genotype=='B73')
                     
+rownames(selfmat)=rownames(all.haps)
 
 rownames(gsmat)=rownames(all.haps)
 rownames(temat)=rownames(all.haps)
@@ -86,6 +113,8 @@ rownames(telomeremat)=rownames(all.haps)
 rownames(ribosomalmat)=rownames(all.haps)
 rownames(b73mat)=rownames(all.haps)
 
+colnames(selfmat)=colnames(all.haps)
+             
 colnames(gsmat)=colnames(all.haps)
 colnames(temat)=colnames(all.haps)
 colnames(nontemat)=colnames(all.haps)
@@ -139,7 +168,8 @@ rilsumKeep=data.frame(id=rownames(all.haps), genomesize=rowSums(gsmat[,colnames(
                      telomerebp=rowSums(telomeremat[,colnames(gsmat)%in% paste0(KEEPb73)], na.rm=T),
                      ribosomalbp=rowSums(ribosomalmat[,colnames(gsmat)%in% paste0(KEEPb73)], na.rm=T),
                      b73bp=rowSums(b73bpmat[,colnames(b73bpmat)%in% paste0(KEEPb73)], na.rm=T),
-                     b73rr=rowSums(b73mat[,colnames(b73mat) %in% paste0(KEEPb73)],na.rm=T))
+                     b73rr=rowSums(b73mat[,colnames(b73mat) %in% paste0(KEEPb73)],na.rm=T),
+                     selfrr=rowSums(selfmat[,colnames(selfmat) %in% paste0(KEEPb73)],na.rm=T))
             print(paste0('so now done with ', minB73correct))
             head(rilsumKeep)
               rilsumKeep$nam=str_split_fixed(rilsumKeep$id, '-', 2)[,1]
