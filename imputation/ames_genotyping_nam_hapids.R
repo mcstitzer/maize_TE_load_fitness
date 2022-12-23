@@ -63,6 +63,54 @@ all.haps.namname=str_split_fixed(rownames(all.haps), '-', 2)[,1]
 ## count per sample how many "self" refranges are called
 selfmat=sapply(1:ncol(all.haps), function(x) toupper(atorrm$genotype[match(all.haps[,x], atorrm$hapid)])==toupper(all.haps.namname))
 
+               
+colnames(selfmat)=colnames(all.haps)
+rownames(selfmat)=rownames(all.haps)
+selfrr=rowSums(selfmat[,colnames(selfmat) %in% paste0(KEEPb73)],na.rm=T)
+
+sr=data.frame(selfrr)
+dim(sr)
+head(sr)
+sr$nam=all.haps.namname
+
+               
+rr=read.csv('../imputation/maize1_reference_ranges.csv')
+
+               
+               
+rr %>% group_by(chrom) %>% summarize(max(ref_range_id))
+cm=rr %>% group_by(chrom) %>% summarize(max(ref_range_id))
+pdf('~/transfer/ames_refrange_count.pdf', 24,38)
+ggplot(sr, aes(x=nam, group=nam, y=selfrr)) + geom_boxplot()
+ggplot(sr, aes(x=nam, label=nam, y=selfrr)) + geom_text()
+ggplot(melt(selfmat), aes(x=Var2, color=value, fill=value, y=Var1)) + geom_tile() + scale_fill_brewer(palette='Set
+1', na.value='white') + scale_color_brewer(palette='Set1', na.value='white') + geom_vline(
+head(cm)
+colnames(cm)[2]='maxrr'
+ggplot(melt(selfmat), aes(x=Var2, color=value, fill=value, y=Var1)) + geom_tile() + scale_fill_brewer(palette='Set1', na.value='white') + scale_color_brewer(palette='Set1', na.value='white') + geom_vline(x_intercept=cm$maxrr)
+ggplot(melt(selfmat), aes(x=Var2, color=value, fill=value, y=Var1)) + geom_tile() + scale_fill_brewer(palette='Set1', na.value='white') + scale_color_brewer(palette='Set1', na.value='white') + geom_vline(x=intercept=cm$maxrr)
+ggplot(melt(selfmat), aes(x=Var2, color=value, fill=value, y=Var1)) + geom_tile() + scale_fill_brewer(palette='Set1', na.value='white') + scale_color_brewer(palette='Set1', na.value='white') + geom_vline(xintercept=cm$maxrr)
+dev.off()
+               
+               
+               
+rc=read.table('~/transfer/amesGBS_linecount_sodivthisby4.txt', header=F)
+rc$reads=rc$V1/4
+rc$name=gsub('amesDemultiplex_', '', gsub('.fastq', '', rc$V2))
+temp=str_split_fixed(rc$name, ':', 2)
+rc$nname=paste0(temp[,1], '-', temp[,2])
+rc$nnname=str_split_fixed(rc$nname, '_', 2)[,1]
+rc$nnnname=gsub(':', '_', rc$nnname)
+sr$readcount=rc$reads[match(rownames(sr), rc$nnnname)]
+        
+pdf('~/transfer/ames_readcount_coverage.pdf', 14,8)
+ggplot(sr, aes(x=readcount, y=selfrr)) + geom_text(aes(label=nam))
+ggplot(sr, aes(x=readcount, y=selfrr)) + geom_text(aes(label=nam))
+ggplot(sr, aes(x=readcount, y=selfrr, color=nam=='B73')) + geom_text(aes(label=nam, alpha=0.8)) + scale_color_manual(values=c('black', 'red')) + xlab('GBS read count') + ylab('Refrange called with own haplotype')
+dev.off()
+ ## this history is saved in ohnothisisbad.R
+               
+               
 
 gsmat=sapply(1:ncol(all.haps), function(x) atorrm$hapwidth[match(all.haps[,x], atorrm$hapid)])
 temat=sapply(1:ncol(all.haps), function(x) atorrm$TEbp[match(all.haps[,x], atorrm$hapid)])
