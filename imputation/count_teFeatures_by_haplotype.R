@@ -166,7 +166,7 @@ for(genome in genomes){
 # if(genome=='Oh7B'){seqlevels(te)=gsub(tolower(paste0(genome, '_')), '', tolower(seqlevels(te)))}
 
   ## make it easier on me and only keep TEs from the families I care about!!
-  te=te[te$Name %in% mbTEs$Name[mbTEs$bp>10000000& !mbTEs$Classification %in% unlist(otherClassifications)],]
+#  te=te[te$Name %in% mbTEs$Name[mbTEs$bp>10000000& !mbTEs$Classification %in% unlist(otherClassifications)],]
           
 ## get the hapids that come from this genome
  haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
