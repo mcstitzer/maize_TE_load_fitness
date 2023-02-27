@@ -180,5 +180,12 @@ plot(result)
 dev.off()
                  
                  
+library(texreg) ## stargazer and this can't do scinot, so thin kthis through later
+mDTS=lm(DTS~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
+mGY=lm(GY~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
+                 
+texreg(list(mDTS, mGY), digits=10)
+                 
+                 
                  
                  
