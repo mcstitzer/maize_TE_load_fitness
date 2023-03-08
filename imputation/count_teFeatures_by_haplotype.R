@@ -94,9 +94,13 @@ allTE=lapply(genomes, function(genome){
 
 ### read in umr counts for each TE - these should be same dimensions as te annotation (te)
           umr=read.table(paste0('../te_summaries/',genome, '-TE-UMR.bed'))
-          te$umrCount=umr$V10
-          te$umrBp=umr$V11
-          te$umrCoverage=umr$V13
+          umr$ID=gsub('ID=', '', str_split_fixed(umr$V9, ';', 2)[,1])
+          te$umrCount=0
+          te$umrCount[te$ID %in% umr$ID]=umr$V10[match(te$ID[te$ID %in% umr$ID], umr$ID)]
+          te$umrBp=0
+          te$umrBp[te$ID %in% umr$ID]=umr$V11[match(te$ID[te$ID %in% umr$ID], umr$ID)]
+          te$umrCoverage=0
+          te$umrCoverage[te$ID %in% umr$ID]=umr$V13[match(te$ID[te$ID %in% umr$ID], umr$ID)]
           
  return(te)
           })
@@ -131,7 +135,9 @@ telengthbins=quantile(width(te[te$sup %in% tesup]), probs = seq(0, 1, by = .1))
 genedistbins=quantile(te[te$sup %in% tesup,]$genedist, probs = seq(0, 1, by = .1))
 coredistbins=quantile(te[te$sup %in% tesup,]$coredist, probs = seq(0, 1, by = .1))
 agebins=quantile(as.numeric(te[te$sup %in% tesup,]$Identity), probs = seq(0, 1, by = .1), na.rm=T)
-umrbins= 
+umrCountbins=quantile(as.numeric(te[te$sup %in% tesup,]$umrCount), probs = seq(0, 1, by = .1), na.rm=T)
+umrBpbins=quantile(as.numeric(te[te$sup %in% tesup,]$umrBp), probs = seq(0, 1, by = .1), na.rm=T)
+umrCoveragebins=quantile(as.numeric(te[te$sup %in% tesup,]$umrCoverage), probs = seq(0, 1, by = .1), na.rm=T)
 
                 
                 
