@@ -132,19 +132,21 @@ mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=
                 
 ##define bins
 telengthbins=quantile(width(te[te$sup %in% tesup]), probs = seq(0, 1, by = .1))
-genedistbins=quantile(te[te$sup %in% tesup,]$genedist, probs = seq(0, 1, by = .1))
-coredistbins=quantile(te[te$sup %in% tesup,]$coredist, probs = seq(0, 1, by = .1))
+genedistbins=quantile(te[te$sup %in% tesup,]$genedist, probs = seq(0, 1, by = .1), na.rm=T) ## nas from contigs?
+coredistbins=quantile(te[te$sup %in% tesup,]$coredist, probs = seq(0, 1, by = .1), na.rm=T)
 agebins=quantile(as.numeric(te[te$sup %in% tesup,]$Identity), probs = seq(0, 1, by = .1), na.rm=T)
 umrCountbins=quantile(as.numeric(te[te$sup %in% tesup,]$umrCount), probs = seq(0, 1, by = .1), na.rm=T)
 umrBpbins=quantile(as.numeric(te[te$sup %in% tesup,]$umrBp), probs = seq(0, 1, by = .1), na.rm=T)
 umrCoveragebins=quantile(as.numeric(te[te$sup %in% tesup,]$umrCoverage), probs = seq(0, 1, by = .1), na.rm=T)
 
+ te$telengthdecile=cut(width(te), breaks=telengthbins, include.lowest=T)               
+ te$genedistdecile=cut(te$genedist, breaks=genedistbins, include.lowest=T)               
+te$coredistdecile=cut(te$coredist, breaks=coredistbins, include.lowest=T)               
+te$agedecile=cut(as.numeric(te$Identity), breaks=agebins, include.lowest=T)               
+
                 
                 
-                
-                
-                
-supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
+#supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
 #write.table(supTEs, 'TE_content_across_NAM_genotypes_by_sup.txt', row.names=F, col.names=T, sep='\t', quote=F)
 
 
@@ -155,24 +157,32 @@ supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(widt
                
                 
 ## add numeric columns for each classification category we're going to consider
-                ## here, any te family with >10mb across all genomes
-for(i in mbTEs$Name[mbTEs$bp>10000000 & !mbTEs$Classification %in% unlist(otherClassifications)]){
-  a[,paste0(i)]=0
+## each decile of gene dist, core dist, age, telength
+## just nonzero umrs (last decile, because easier)
+for(i in 1:10){
+  a[,paste0('telength', 'decile',i)]=0
+  a[,paste0('coredist', 'decile',i)]=0
+  a[,paste0('genedist', 'decile',i)]=0
+  a[,paste0('age', 'decile',i)]=0
   }
+a[,'umrCount0']=0
+a[,'umrCountnon0']=0
+a[,'umrBp0']=0
+a[,'umrBpnon0']=0
+a[,'umrCoverage0']=0
+a[,'umrCoveragenon0']=0
+
 
 ## get started!
 a=data.frame(a) ## just in case it's a data table              
-tes=vector(mode = "list", length = length(genomes)) ## this is a list of the te annotation of each genome
-names(tes)=genomes
+
 
    
                 
 #######################################################3
-###### OKAY, there's an updated version of EDT annotations for NAM
-
+######## loop through and populate the entry of tes
                 
-
-## loop through and populate the entry of tes
+                
 for(genome in genomes){
  ## read in EDTA TE annotation
  ### filenames have different capitalization than before :( so sad
@@ -227,13 +237,15 @@ for(genome in genomes){
           
 
   ### by "family"
-  for(fam in mbTEs$Name[mbTEs$bp>10000000& !mbTEs$Classification %in% unlist(otherClassifications)]){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$Name==fam & !is.na(te$Name),]), haps, ignore.strand=T)
+  for(decile in c(1,10)){
+      tehapintersect=GenomicRanges::intersect(reduce(te[te$coredistdecile==levels(te$coredistdecile)[decile] & !is.na(te$coredistdecile),]), haps, ignore.strand=T)
       thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
       ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
       thro=findOverlaps(ov, haps, ignore.strand=T)
-      tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-  a[,fam][a$genotype==genome][unique(subjectHits(thro))]=tebp
+      mcols(thro)$queryWidth=width(ov[queryHits(thro),])
+   #   tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
+      tebp=data.frame(thro) %>% group_by(subjectHits) %>% dplyr::summarize(sum=sum(queryWidth))
+                  a[a$genotype==genome,paste0('coredistdecile', decile)][unique(subjectHits(thro))]=tebp$sum
 
     }      
 
