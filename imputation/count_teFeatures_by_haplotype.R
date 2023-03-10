@@ -229,6 +229,6 @@ alldeciles=lapply(genomes, function(genome){
 return(hapinfo)
 }) ## running through here overnight!!!
 
-hapdec=do.call(c, alldeciles)
+hapdec=do.call(rbind, alldeciles)
                 
 write.table(hapdec, paste0('allNAM_hapids.deciles.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
