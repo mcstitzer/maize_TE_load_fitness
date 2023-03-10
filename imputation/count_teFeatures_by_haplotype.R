@@ -102,13 +102,16 @@ allTE=lapply(genomes, function(genome){
           te$umrCoverage=0
           te$umrCoverage[te$ID %in% umr$ID]=umr$V13[match(te$ID[te$ID %in% umr$ID], umr$ID)]
           
+          
+ ## fine just put in a genotype column??
+ te$genotype=genome
  return(te)
           })
 
 at=do.call(c, allTE)
 ## need to remove _INT and _LTR from the end
 at$Name=gsub('_LTR', '', gsub('_INT', '', at$Name))
-mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
+#mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
 
 #write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
        
@@ -181,50 +184,11 @@ a=data.frame(a) ## just in case it's a data table
                 
 #######################################################3
 ######## loop through and populate the entry of tes
+## omg this library is saving my life!
+library(plyranges)         
                 
-                
-for(genome in genomes){
- ## read in EDTA TE annotation
- ### filenames have different capitalization than before :( so sad
- filegenome=genome
- if(genome == 'Oh7B'){filegenome='Oh7b'}
- edtafilename=list.files(path='../genomes_and_annotations/tes/new_edta_tes/', pattern=paste0(filegenome, '.+', 'split.gff3.gz'), full.names=T)
- te=import.gff(edtafilename)
- ## the new ones go B73_chr1
- seqlevels(te)=str_split_fixed(seqlevels(te), '_', 2)[,2]
- 
- ## reformat to get superfamily for each TE annotation
- te$sup=str_split_fixed(te$Classification, '/', 2)[,2]
- te$sup[te$sup=='Gypsy']='RLG'
- te$sup[te$sup=='Copia']='RLC'
- te$sup[te$sup=='unknown' & te$Classification=='LTR/unknown']='RLX'
- te$sup[te$sup=='Helitron']='DHH'
- te$sup[te$sup=='CRM']='RLG' ## need these and following ones because not structural
- te$sup[te$sup=='L1']='RIL'
- te$sup[te$sup=='RTE']='RIT'
- te$sup[te$sup=='unknown' & te$Classification=='LINE/unknown']='RIX'
- 
- te$sup[!te$Classification %in% classificationTE]=NA
-
- ## match to what i did to collect names, removing int and ltr from families to get match
- te$Name=gsub('_LTR', '', gsub('_INT', '', te$Name))
-
-          
-## make sure we added right
-  assert_that(sum(te$Classification %in% c('DNA/DTA', 'MITE/DTA'))==sum(te$sup=='DTA', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTC', 'MITE/DTC'))==sum(te$sup=='DTC', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTH', 'MITE/DTH'))==sum(te$sup=='DTH', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTM', 'MITE/DTM'))==sum(te$sup=='DTM', na.rm=T))
-  assert_that(sum(te$Classification %in% c('DNA/DTT', 'MITE/DTT'))==sum(te$sup=='DTT', na.rm=T))
-  assert_that(sum(te$Classification %in% c('LTR/CRM', 'LTR/Gypsy'))==sum(te$sup=='RLG', na.rm=T))
-
-## not an issue for these guys
-## Oh7B TE annotation has "oh7b" on the chromosome names... just remove that
-# if(genome=='Oh7B'){seqlevels(te)=gsub(tolower(paste0(genome, '_')), '', tolower(seqlevels(te)))}
-
-  ## make it easier on me and only keep TEs from the families I care about!!
-#  te=te[te$Name %in% mbTEs$Name[mbTEs$bp>10000000& !mbTEs$Classification %in% unlist(otherClassifications)],]
-          
+alldeciles=lapply(genomes, function(genome){
+   
 ## get the hapids that come from this genome
  haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
  haps$hapid=a$hapid[a$genotype==genome]
@@ -236,20 +200,35 @@ for(genome in genomes){
           ### get count of TE length
           
 
+          
   ### by "family"
-  for(decile in c(1,10)){
-      tehapintersect=GenomicRanges::intersect(reduce(te[te$coredistdecile==levels(te$coredistdecile)[decile] & !is.na(te$coredistdecile),]), haps, ignore.strand=T)
-      thro1=findOverlaps(tehapintersect, haps, ignore.strand=T) ## subset first and then count overlaps
-      ov=pintersect(tehapintersect[queryHits(thro1)],haps[subjectHits(thro1)], ignore.strand=T) ## pairwise, so won't collapse the 1bp apart adjacent hits
-      thro=findOverlaps(ov, haps, ignore.strand=T)
-      mcols(thro)$queryWidth=width(ov[queryHits(thro),])
-   #   tebp=sapply(unique(subjectHits(thro)), function(x) sum(width(ov[queryHits(thro)[subjectHits(thro)==x],]))) ## for individual sup/fam, go through reduce with each sup/fam - this is relaly far away from reality of te inseertion
-      tebp=data.frame(thro) %>% group_by(subjectHits) %>% dplyr::summarize(sum=sum(queryWidth))
-                  a[a$genotype==genome,paste0('coredistdecile', decile)][unique(subjectHits(thro))]=tebp$sum
 
-    }      
+      tedec=te[te$genotype==genome,] %>% group_by(coredistdecile) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      coredist=data.frame(tedechaps) %>% group_by(hapid, coredistdecile) %>% summarize(coredistbp=sum(width))
 
-print(genome)
-} ## running through here overnight!!!
+      tedec=te[te$genotype==genome,] %>% group_by(genedistdecile) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      genedist=data.frame(tedechaps) %>% group_by(hapid, genedistdecile) %>% summarize(genedistbp=sum(width))
+      tedec=te[te$genotype==genome,] %>% group_by(telengthdecile) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      telength=data.frame(tedechaps) %>% group_by(hapid, telengthdecile) %>% summarize(telengthbp=sum(width))
+      tedec=te[te$genotype==genome & !is.na(te$Identity),] %>% group_by(agedecile) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      age=data.frame(tedechaps) %>% group_by(hapid, agedecile) %>% summarize(agedistbp=sum(width))
 
-write.table(a, paste0('allNAM_hapids.FamiliesUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+      tedec=te[te$genotype==genome,] %>% group_by(umrCountnonzero=umrCount>0) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      umrCountnonzero=data.frame(tedechaps) %>% group_by(hapid, umrCountnonzero) %>% summarize(umrCountnonzerobp=sum(width))
+
+      hapinfo=merge(coredist, genedist, all=T)
+      hapinfo=merge(hapinfo, telength, all=T)
+      hapinfo=merge(hapinfo, age, all=T)
+      hapinfo=merge(hapinfo, umrCountnonzero, all=T) ## this is getting hard when there's multiple deciles per haplotype...
+
+return(hapinfo)
+}) ## running through here overnight!!!
+
+hapdec=do.call(c, alldeciles)
+                
+write.table(hapdec, paste0('allNAM_hapids.deciles.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
