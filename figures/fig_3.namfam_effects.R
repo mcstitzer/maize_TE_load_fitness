@@ -115,10 +115,25 @@ plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=1, labels='AUTO'), l
 dev.off()      
 
 
-pdf(paste0('~/transfer/mm2023_yieldeffects.', Sys.Date(), '.pdf'), 6,2)
+pdf(paste0('~/transfer/mm2023_yieldeffects.', Sys.Date(), '.pdf'), 8,2)
 
-gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect), -min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect))
+gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
 gyEs
+
+## mo18w first
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp' & pahFam$nam=='Mo18W',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+
+## then nc350
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp' & pahFam$nam%in%c('Mo18W', 'NC350'),], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+
+## then b97
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp' & pahFam$nam%in%c('Mo18W', 'NC350', 'B97'),], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+
+
+## get a legend?
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal, guide = "none")+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+
+
 gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_text(aes(label=nam)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
 gyEs
 
