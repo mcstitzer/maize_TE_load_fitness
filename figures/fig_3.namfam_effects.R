@@ -115,3 +115,35 @@ plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=1, labels='AUTO'), l
 dev.off()      
 
 
+pdf(paste0('~/transfer/mm2023_yieldeffects.', Sys.Date(), '.pdf'), 6,2)
+
+gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect), -min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect))
+gyEs
+gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_text(aes(label=nam)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
+gyEs
+
+dev.off()
+
+
+pahDF=read.table('../models/lm_output_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
+
+teh=read.table('../models/geno_pheno_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
+
+legend=readRDS('subpopulation_legend.RDS')
+
+pdf(paste0('~/transfer/mm2023_yieldbyfam.', Sys.Date(), '.pdf'), 3,3)
+
+for(nam in unique(teh$nam)){
+  
+  
+gyrawt=ggplot(teh[teh$nam==nam,], aes(x=tebp/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Mbp)')+ xlim(min(teh$tebp/1e6), max(teh$tebp/1e6)) + ylim(min(teh$GYraw, na.rm=T), max(teh$GYraw, na.rm=T)) +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahFam$r2[pahFam$geno=='tebp' & pahFam$pheno=='GYraw' & pahFam$nam==nam], digits=2), 
+             '\np = ', signif(pahFam$pval[pahFam$geno=='tebp' & pahFam$pheno=='GYraw' & pahFam$nam==nam], digits=2)), vjust=1, hjust=1, color='#99195E') + ggtitle(nam)
+print(gyrawt)
+
+
+  }
+
+  dev.off()
