@@ -137,6 +137,11 @@ ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=labe
 gyEs=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_text(aes(label=nam)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
 gyEs
 
+## lollipop
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=0, xend=gsEffect, y=r2, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() +geom_segment() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank())+  scale_size_area(max_size=20) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',], aes(x=0, xend=gsEffect, y=r2, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=2)) + geom_point() +geom_segment()  + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ theme(axis.text.y=element_blank()) + scale_alpha(range=c(0.5,0.9)) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8))
+
+
 dev.off()
 
 
