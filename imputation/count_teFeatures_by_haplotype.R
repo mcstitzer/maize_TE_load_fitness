@@ -147,6 +147,14 @@ umrCoveragebins=quantile(as.numeric(te[te$sup %in% tesup,]$umrCoverage), probs =
 te$coredistdecile=cut(te$coredist, breaks=coredistbins, include.lowest=T)               
 te$agedecile=cut(as.numeric(te$Identity), breaks=agebins, include.lowest=T)               
 
+  
+                
+te$ingene=te$coredist==0
+te$onekbgene=te$coredist>0 & te$coredist<1001
+te$fivekbgene=te$coredist>1000 & te$coredist<5001
+te$genecat=ifelse(te$ingene, 'ingene', ifelse(te$onekbgene, 'onekb', ifelse(te$fivekbgene, 'fivekb', 'greater')))
+te$umr=te$umrCount>0
+
                 
                 
 #supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
@@ -162,18 +170,18 @@ te$agedecile=cut(as.numeric(te$Identity), breaks=agebins, include.lowest=T)
 ## add numeric columns for each classification category we're going to consider
 ## each decile of gene dist, core dist, age, telength
 ## just nonzero umrs (last decile, because easier)
-for(i in 1:10){
-  a[,paste0('telength', 'decile',i)]=0
-  a[,paste0('coredist', 'decile',i)]=0
-  a[,paste0('genedist', 'decile',i)]=0
-  a[,paste0('age', 'decile',i)]=0
-  }
-a[,'umrCount0']=0
-a[,'umrCountnon0']=0
-a[,'umrBp0']=0
-a[,'umrBpnon0']=0
-a[,'umrCoverage0']=0
-a[,'umrCoveragenon0']=0
+#for(i in 1:10){
+#  a[,paste0('telength', 'decile',i)]=0
+#  a[,paste0('coredist', 'decile',i)]=0
+#  a[,paste0('genedist', 'decile',i)]=0
+#  a[,paste0('age', 'decile',i)]=0
+#  }
+#a[,'umrCount0']=0
+#a[,'umrCountnon0']=0
+#a[,'umrBp0']=0
+#a[,'umrBpnon0']=0
+#a[,'umrCoverage0']=0
+#a[,'umrCoveragenon0']=0
 
 
 ## get started!
@@ -232,3 +240,46 @@ return(hapinfo)
 hapdec=do.call(rbind, alldeciles)
                 
 write.table(hapdec, paste0('allNAM_hapids.deciles.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+                
+                
+                
+                
+                
+genedist=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+      tedec=te[te$genotype==genome,] %>% group_by(genecat) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      coredist=data.frame(tedechaps) %>% group_by(hapid, genecat) %>% summarize(genecatbp=sum(width))
+
+  
+return(coredist)
+}) ## running through here overnight!!!
+
+hapdec=do.call(rbind, genedist)
+                
+write.table(hapdec, 'coregene_distance_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
+                
+umr=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+
+      tedec=te[te$genotype==genome,] %>% group_by(umrCountnonzero=umrCount>0) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      umrCountnonzero=data.frame(tedechaps) %>% group_by(hapid, umrCountnonzero) %>% summarize(umrCountnonzerobp=sum(width))
+
+return(umrCountnonzero)
+}) ## running through here overnight!!!
+
+hapumr=do.call(rbind, umr)
+                
+                
+write.table(hapumr, 'umr_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
