@@ -212,3 +212,44 @@ gytn=ggplot(teh, aes(x=tebp/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7)
 
 gytn
 dev.off()
+
+
+
+
+summary(lm(teh$GYraw~teh$ingene + teh$onekb + teh$fivekb + teh$greater  + teh$b73bp))
+
+library(broom)
+gd=tidy(summary(lm(teh$GYraw~teh$ingene + teh$onekb + teh$fivekb + teh$greater  + teh$b73bp)))
+gd$t2=c('', 'In gene', 'One kb', 'Five kb', 'Greater', '')
+
+gd$mean=c(0, mean(teh$ingene), mean(teh$onekb), mean(teh$fivekb), mean(teh$greater), 0)
+
+
+um=tidy(summary(lm(teh$GYraw~teh$noUMR + teh$hasUMR + teh$b73bp)))
+um$t2=c('', 'noUMR', 'hasUMR', '')
+
+um$mean=c(0, mean(teh$noUMR), mean(teh$hasUMR), 0)
+
+
+
+pdf('~/transfer/mm2023_genemethyl.pdf', 8,4)
+
+ggplot(gd[2:5,], aes(x=factor(t2, levels=c('In gene', 'One kb', 'Five kb', 'Greater')), y=estimate, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') + ylim(-max(gd$estimate[-1]), max(gd$estimate[-1]))
+ggplot(gd[2:5,], aes(x=factor(t2, levels=c('In gene', 'One kb', 'Five kb', 'Greater')), y=mean, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') 
+ggplot(gd[2:5,], aes(x=factor(t2, levels=c('In gene', 'One kb', 'Five kb', 'Greater')), y=mean*estimate, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') 
+
+
+ggplot(um[2:3,], aes(x=factor(t2, levels=c('noUMR', 'hasUMR')), y=estimate, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') + ylim(-max(abs(um$estimate[-c(1,4)])), max(abs(um$estimate[-c(1,4)])))
+ggplot(um[2:3,], aes(x=factor(t2, levels=c('noUMR', 'hasUMR')), y=mean, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') 
+ggplot(um[2:3,], aes(x=factor(t2, levels=c('noUMR', 'hasUMR')), y=mean*estimate, fill=t2)) + geom_bar(stat='identity') + theme(legend.position='NULL') + scale_fill_brewer(palette='Dark2') 
+
+
+gytn=ggplot(teh, aes(x=onekb/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content 1kb from gene (Mbp)')           
+gytn
+
+gytn=ggplot(teh, aes(x=hasUMR/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content with UMR (Mbp)')           
+gytn
+dev.off()
+
+
+
