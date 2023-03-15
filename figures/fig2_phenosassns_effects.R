@@ -201,3 +201,14 @@ print(genomesize)
 dev.off()
 
 
+
+pdf('~/transfer/mm2023_yieldpheno.pdf', 8,4)
+
+gytn=ggplot(teh, aes(x=tebp/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') +           
+              annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+gytn
+dev.off()
