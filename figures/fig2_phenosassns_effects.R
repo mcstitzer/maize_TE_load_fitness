@@ -296,8 +296,9 @@ dev.off()
 
 
 
-
 pdf('~/transfer/mm2023_gene.pdf', 4,2)
+
+pdf('~/transfer/mm2023_gene.small.pdf', 2,2)
 
 ggplot(teh, aes(x=ingene/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + 
 stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + 
