@@ -177,3 +177,28 @@ ggplot(tefocusRR[-1,], aes(x=tefocusGY, y=umrCount/totalbp, label=term, color=su
 ggplot(tefocusRR[-1,], aes(x=tefocusGYraw, y=umrCount/totalbp, label=term, color=superfam)) +geom_vline(xintercept=0, color='gray', lty='dashed') + geom_text() + scale_color_brewer(palette='Set1') + geom_point(color='black', size=0.5)
 
 dev.off()
+
+              
+rtf=read.table('ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+
+rtfy=merge(teh[,c('id', 'GY', 'b73bp')], rtf, by.x='id', by.y='RIL')
+tef=tidy(lm(GY~., data=rtfy[,-1]))
+
+tef[tef$p.value<0.05,] %>% print(n=100)
+              
+
+tefocusRR=read.table('../models/te_fam_ridgeregression.2022-09-13.txt', header=T, sep='\t')
+
+teff=merge(tef, tefocusRR)
+              
+teff[teff$p.value<0.05,] %>% print(n=100)
+        
+              
+pdf('~/transfer/mm2023_tefams.pdf', 6,3)
+ggplot(teff[teff$p.value<0.05,], aes(x=estimate,  y=factor(superfam),color=superfam)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+  scale_size_area(max_size=20) + xlim(-max(abs(teff[teff$p.value<0.05,]$estimate[-1]))-0.5e-8, -(min(teff[teff$p.value<0.05,]$estimate[-1])-0.5e-8))
+ggplot(teff[teff$p.value<0.05,], aes(x=estimate, xend=estimate, y=superfam, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, aes(color=ifelse(pval<0.05, 'black', 'gray')), size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
+ggplot(teff[teff$p.value<0.05,], aes(x=estimate, xend=estimate, y=superfam, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, color= 'black', size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
+dev.off()
+              
+              
+        
