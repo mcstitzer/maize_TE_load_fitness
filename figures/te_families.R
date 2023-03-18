@@ -193,13 +193,20 @@ teff=merge(tef, tefocusRR)
               
 teff[teff$p.value<0.05,] %>% print(n=100)
         
-teffp=teff[teff$p.value<0.05 & substr(teff$term,1,2)!='TE',][-1,]
+             
+teff$sup=teff$superfam
+teff$sup[teff$sup=='Copia']='RLC'
+teff$sup[teff$sup=='Helitron']='DHH'
+teff$sup[teff$sup=='unknown']='RLX'
+teff$sup[teff$sup=='L1']='RIL'
+teff$sup[teff$sup=='RTE']='RIT'
               
-teffp$sup=teffp$superfam
-teffp$sup[teffp$sup=='Copia']='RLC'
-teffp$sup[teffp$sup=='Helitron']='DHH'
-teffp$sup[teffp$sup=='unknown']='RLX'
-
+              
+teffp=teff[teff$p.value<0.05 & substr(teff$term,1,2)!='TE' & teff$totalbp>20000000,][-1,]
+ 
+teffd=teff[substr(teff$term,1,2)!='TE'& teff$totalbp>20000000,][-1,]
+ 
+              
   source('../figures/color_palette.R')
 library(ggridges)              
 pdf('~/transfer/mm2023_tefams.pdf', 6,3)
@@ -207,10 +214,31 @@ ggplot(teff[teff$p.value<0.05,], aes(x=estimate,  y=factor(superfam),color=super
 ggplot(teff[teff$p.value<0.05,], aes(x=estimate, xend=estimate, y=superfam, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, aes(color=ifelse(pval<0.05, 'black', 'gray')), size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
 ggplot(teff[teff$p.value<0.05,], aes(x=estimate, xend=estimate, y=superfam, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, color= 'black', size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebp',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
 
-ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(min(teffp[teffp$p.value<0.05,]$estimate), -(min(teffp[teffp$p.value<0.05,]$estimate)))
-ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(teffp[teffp$p.value<0.05,]$estimate), -(min(teffp[teffp$p.value<0.05,]$estimate)))
+ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$estimate)), max(abs(teffp$estimate)))
+ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$estimate)), max(abs(teffp$estimate)))
+
+ggplot(teffp, aes(x=  tefocusGY, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$tefocusGY)), max(abs(teffp$tefocusGY)))
+ggplot(teffp, aes(x=  tefocusGY, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$tefocusGY)), max(abs(teffp$tefocusGY)))
 
               
+ggplot(teffd, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$estimate)), max(abs(teffd$estimate)))
+ggplot(teffd, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$estimate)), max(abs(teffd$estimate)))
+  
+ggplot(teffd, aes(x=  tefocusGY, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$tefocusGY)), max(abs(teffd$tefocusGY)))
+ggplot(teffd, aes(x=  tefocusGY, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$tefocusGY)), max(abs(teffd$tefocusGY)))
+   
+ggplot(teffd, aes(x=  tefocusGYraw, y=sup, fill=sup, color=sup)) + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$tefocusGYraw)), max(abs(teffd$tefocusGYraw)))
+ggplot(teffd, aes(x=  tefocusGYraw, y=sup, fill=sup, color=sup)) + geom_point(size=2)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$tefocusGYraw)), max(abs(teffd$tefocusGYraw)))
+  
+              
+ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=4, jittered_points=T, scale=0.7)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$estimate)), max(abs(teffp$estimate)))
+ggplot(teffp, aes(x=  tefocusGY, y=sup, fill=sup, color=sup))+ geom_vline(xintercept=0, color='gray', lty='dashed') + geom_density_ridges(aes(pointcolor=sup, point_fill=sup), alpha=0.2, point_alpha=1, point_size=2, jittered_points=T, scale=0.8)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$tefocusGY)), max(abs(teffp$tefocusGY)))
+
+ggplot(teffp, aes(x=  estimate, y=sup, fill=sup, color=sup)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_jitter(size=4, height=0.3, alpha=0.9)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$estimate)), max(abs(teffp$estimate)))
+ggplot(teffp, aes(x=  tefocusGY, y=sup, fill=sup, color=sup)) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_jitter(size=4, height=0.3, alpha=0.9)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffp$tefocusGY)), max(abs(teffp$tefocusGY)))
+
+ ggplot(teffd, aes(x=  tefocusGY))+ geom_vline(xintercept=0, color='gray', lty='dashed') + geom_density(alpha=0.2) + geom_jitter(height=1, aes(y=1, color=sup))      + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(teffd$tefocusGY)), max(abs(teffd$tefocusGY)))
+             
 dev.off()
               
                   
