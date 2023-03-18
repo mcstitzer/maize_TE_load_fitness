@@ -298,39 +298,39 @@ dev.off()
 
 pdf('~/transfer/mm2023_gene.pdf', 4,2)
 
-pdf('~/transfer/mm2023_gene.small.pdf', 2,2)
+pdf('~/transfer/mm2023_gene.small.pdf', 3,2)
 
 ggplot(teh, aes(x=ingene/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + 
 stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + 
 #geom_abline(lwd=1.5, aes(slope=um$estimate[3],intercept=um$estimate[1],color='#99195E', alpha=0.8)) + 
-scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') +           
-              annotate("text",  x=Inf, y = Inf, label = paste0(
+scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') #+           
+#              annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
     #         'R\U00B2 = ', signif(um$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
-             '\np = ', signif(gd$p.value[gd$t2=='In gene'], digits=2)), vjust=1, hjust=1, color='#99195E')# + xlim(min(teh$ingene), min(teh$ingene)+10e6)
+#             '\np = ', signif(gd$p.value[gd$t2=='In gene'], digits=2)), vjust=1, hjust=1, color='#99195E')# + xlim(min(teh$ingene), min(teh$ingene)+10e6)
 ggplot(teh, aes(x=onekb/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + 
 stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + 
 #geom_abline(lwd=1.5, aes(slope=um$estimate[3],intercept=um$estimate[1],color='#99195E', alpha=0.8)) + 
-scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') +           
-              annotate("text",  x=Inf, y = Inf, label = paste0(
+scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') #+           
+#              annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
     #         'R\U00B2 = ', signif(um$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
-             '\np = ', signif(gd$p.value[gd$t2=='One kb'], digits=2)), vjust=1, hjust=1, color='#99195E')#+ xlim(min(teh$onekb), min(teh$onekb)+5e6)
+#             '\np = ', signif(gd$p.value[gd$t2=='One kb'], digits=2)), vjust=1, hjust=1, color='#99195E')#+ xlim(min(teh$onekb), min(teh$onekb)+5e6)
 ggplot(teh, aes(x=fivekb/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + 
 stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + 
 #geom_abline(lwd=1.5, aes(slope=um$estimate[3],intercept=um$estimate[1],color='#99195E', alpha=0.8)) + 
-scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') +           
-              annotate("text",  x=Inf, y = Inf, label = paste0(
+scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') #+           
+#              annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
     #         'R\U00B2 = ', signif(um$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
-             '\np = ', signif(gd$p.value[gd$t2=='Five kb'], digits=2)), vjust=1, hjust=1, color='#99195E')#+ xlim(min(teh$fivekb), min(teh$fivekb)+5e6)
+#             '\np = ', signif(gd$p.value[gd$t2=='Five kb'], digits=2)), vjust=1, hjust=1, color='#99195E')#+ xlim(min(teh$fivekb), min(teh$fivekb)+5e6)
 ggplot(teh, aes(x=greater/1e6, y=GYraw, color=subpop)) + geom_point(alpha=0.7) + 
 stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + 
 #geom_abline(lwd=1.5, aes(slope=um$estimate[3],intercept=um$estimate[1],color='#99195E', alpha=0.8)) + 
-scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') +           
-              annotate("text",  x=Inf, y = Inf, label = paste0(
+scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield (BLUE, t/ha)')+xlab('Imputed TE content (Gbp)') #+           
+#              annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GYraw']*1e6, digits=2), '\n',
     #         'R\U00B2 = ', signif(um$r2[pahDF$geno=='tebp' & pahDF$pheno=='GYraw'], digits=2), 
-             '\np = ', signif(gd$p.value[gd$t2=='Greater'], digits=2)), vjust=1, hjust=1, color='#99195E')
+#             '\np = ', signif(gd$p.value[gd$t2=='Greater'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
 dev.off()
