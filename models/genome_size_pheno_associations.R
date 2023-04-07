@@ -141,14 +141,29 @@ write.table(tep, paste0('geno_pheno_mphenos.greaterthan',b73CorrectNumber, 'b73c
 }
 
                  
+teh$tebpPHZ51=teh$tebp+1952386843
+teh$allknobbpPHZ51=teh$allknobbp +22369776
+teh$centromerebpPHZ51=teh$centromerebp+8822077
+teh$telomerebpPHZ51=teh$telomerebp+1208217
+teh$ribosomalbpPHZ51=teh$ribosomalbp+2210613
                  
 teh$nontenonrepeatbp=teh$nontebp-teh$allknobbp-teh$centromerebp-teh$telomerebp-teh$ribosomalbp
+      
+teh$nontenonrepeatbpPHZ51=teh$nontenonrepeatbp+215278677
                  
 mDTS=lm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
 mGY=lm(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
                  
 summary(mDTS)
 summary(mGY)
+                 
+               
+mDTSPHZ51=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp, data=teh)
+mGYPHZ51=lm(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp, data=teh)
+                 
+summary(mDTSPHZ51)
+summary(mGYPHZ51)
+
                  
                  
 mDTSn=lmer(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
@@ -157,11 +172,18 @@ mGYn=lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp
 summary(mDTSn)
 summary(mGYn)
                  
+                 
+mDTSnPHZ51=lmer(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
+mGYnPHZ51=lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
+                 
+summary(mDTSnPHZ51)
+summary(mGYnPHZ51)
+                 
 library(rstanarm)
 
 model <- stan_glm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh, refresh = 0)
 sjstats::r2(model)
-model <- stan_lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp + (1|nam), data=teh, refresh = 0)
+model <- stan_lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51 + (1|nam), data=teh, refresh = 0)
 
 sjstats::r2(model)
 
