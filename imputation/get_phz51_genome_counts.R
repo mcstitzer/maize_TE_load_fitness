@@ -1,0 +1,28 @@
+library(rtracklayer)
+library(stringr)
+library(dplyr)
+
+a=import.gff3('5_Buckler-PHZ51_mecatErrorCorrected.contigs.RepeatMasker.gff3')
+a$Class=str_split_fixed(a$Target, ' ', 3)[,1]
+um=read.table('../imputation/TE_content_across_NAM_genotypes_by_fam.2022-08-08.txt', header=T)
+a$Classification=um$Classification[match(a$Class, um$Name)]
+classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
+classificationKnob=c('knob/TR-1', 'knob/knob180')
+classificationCent=c('Cent/CentC')
+classificationTelo=c('subtelomere/4-12-1')
+classificationRibo=c('rDNA/spacer')
+otherClassifications=list(classificationKnob, classificationCent, classificationTelo, classificationRibo)
+names(otherClassifications)=c('knob', 'centromere', 'telomere', 'ribosomal')
+tesup=c("DHH", "DTA", "DTC", "DTH", "DTM", "DTT", "RIL", "RIT", "RIX", "RLC", "RLG", "RLX")
+specificRepeats=c('knob/knob180', 'knob/TR-1', 'LTR/CRM')
+names(specificRepeats)=c('knob180', 'tr1', 'crm') ## keep separate knobs, centromeric retrotransposon annotation
+
+
+sum(width(a)[a$Classification %in% classificationTE]) ## 1952386843
+sum(width(a)[a$Classification %in% classificationKnob]) ## 22369776 ## I can't find anything cytologically about phz51 knobs, but B73 this way has 36481372
+sum(width(a)[a$Classification %in% classificationCent]) ## 8822077
+sum(width(a)[a$Classification %in% classificationTelo]) ## 1208217
+sum(width(a)[a$Classification %in% classificationRibo]) ## 2210613
+
+
+## i'm gonna be lazy and just add this in the model statement
