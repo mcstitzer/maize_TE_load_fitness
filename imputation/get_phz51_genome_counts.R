@@ -24,5 +24,9 @@ sum(width(a)[a$Classification %in% classificationCent]) ## 8822077
 sum(width(a)[a$Classification %in% classificationTelo]) ## 1208217
 sum(width(a)[a$Classification %in% classificationRibo]) ## 2210613
 
+## for nontenonrepeatbp
+phz51=read.table('../../merritt_anchorwave/5_Buckler-PHZ51_mecatErrorCorrected.contigs.fasta.fai') ## gets the assembly size
+sum(phz51$V2)-sum(width(a)) ## 215278677
+
 
 ## i'm gonna be lazy and just add this in the model statement
