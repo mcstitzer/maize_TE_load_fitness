@@ -155,7 +155,11 @@ te$fivekbgene=te$coredist>1000 & te$coredist<5001
 te$genecat=ifelse(te$ingene, 'ingene', ifelse(te$onekbgene, 'onekb', ifelse(te$fivekbgene, 'fivekb', 'greater')))
 te$umr=te$umrCount>0
 
-                
+## guessing on these column names, but find the youngest insertions
+te$recentinsertion=F
+te$recentinsertion[te$Method=='homology' & te$Identity==1]=T
+te$recentinsertion[te$Method=='structural' & te$sup %in% c('RLC', 'RLX', 'RLG') & te$Identity==1]=T
+
                 
 #supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
 #write.table(supTEs, 'TE_content_across_NAM_genotypes_by_sup.txt', row.names=F, col.names=T, sep='\t', quote=F)
@@ -228,11 +232,17 @@ alldeciles=lapply(genomes, function(genome){
       tedec=te[te$genotype==genome,] %>% group_by(umrCountnonzero=umrCount>0) %>% reduce_ranges()
       tedechaps=join_overlap_intersect(tedec, haps)
       umrCountnonzero=data.frame(tedechaps) %>% group_by(hapid, umrCountnonzero) %>% summarize(umrCountnonzerobp=sum(width))
-
+          
+      tedec=te[te$genotype==genome,] %>% group_by(recentinsertion) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      recentinsertion=data.frame(tedechaps) %>% group_by(hapid, recentinsertion) %>% summarize(recentinsertionbp=sum(width))
+    
       hapinfo=merge(coredist, genedist, all=T)
       hapinfo=merge(hapinfo, telength, all=T)
       hapinfo=merge(hapinfo, age, all=T)
       hapinfo=merge(hapinfo, umrCountnonzero, all=T) ## this is getting hard when there's multiple deciles per haplotype...
+      hapinfo=merge(hapinfo, recentinsertion, all=T) ## this is getting hard when there's multiple deciles per haplotype...
+
 
 return(hapinfo)
 }) ## running through here overnight!!!
@@ -283,3 +293,26 @@ hapumr=do.call(rbind, umr)
                 
                 
 write.table(hapumr, 'umr_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
+                
+                
+                
+              
+recent=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+
+      tedec=te[te$genotype==genome,] %>% group_by(recentinsertion) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      recentinsertion=data.frame(tedechaps) %>% group_by(hapid, recentinsertion) %>% summarize(recentinsertionbp=sum(width))
+
+return(recentinsertion)
+}) ## running through here overnight!!!
+
+haprecent=do.call(rbind, recent)
+                
+                
+write.table(haprecent, 'recentinsertion_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
