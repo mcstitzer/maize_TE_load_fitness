@@ -2,7 +2,7 @@ library(rtracklayer)
 library(stringr)
 library(dplyr)
 
-a=import.gff3('5_Buckler-PHZ51_mecatErrorCorrected.contigs.RepeatMasker.gff3')
+a=import.gff3('../genomes_and_annotations/tes/5_Buckler-PHZ51_mecatErrorCorrected.contigs.RepeatMasker.gff3')
 a$Class=str_split_fixed(a$Target, ' ', 3)[,1]
 um=read.table('../imputation/TE_content_across_NAM_genotypes_by_fam.2022-08-08.txt', header=T)
 a$Classification=um$Classification[match(a$Class, um$Name)]
@@ -30,3 +30,26 @@ sum(phz51$V2)-sum(width(a)) ## 215278677
 
 
 ## i'm gonna be lazy and just add this in the model statement
+
+
+## recentinsertion
+library(data.table)
+b=fread('../../merritt_anchorwave/5_Buckler-PHZ51_mecatErrorCorrected.contigs.fasta.out', header=F, skip=3, fill=T)
+
+b$recentinsertion=F
+b$recentinsertion[b$V2==0]=T
+
+sum(width(a)[b$recentinsertion]) ## 2949663
+
+
+
+## distance to gene
+
+g=import.gff3('../../merritt_anchorwave/5_Buckler-PHZ51_mecatErrorCorrected.final_annotation.ARCADIO.gff')
+
+
+
+
+
+
+
