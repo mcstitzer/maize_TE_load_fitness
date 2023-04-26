@@ -209,5 +209,39 @@ mGY=lm(GY~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
 texreg(list(mDTS, mGY), digits=10)
                  
                  
+               
+                 
+                 
+## partial r2
+                 
+library(rsq)
+summary(mGY)
+rsq.partial(mGY)        
+
+                 
+                 
+                 
+tebp=lm(teh$GY~teh$tebp + teh$nontebp + teh$b73bp)
+genic=lm(teh$GY~teh$ingene + teh$onekb + teh$fivekb + teh$greater + teh$nontebp + teh$b73bp)
+umr=lm(teh$GY~teh$hasUMR + teh$noUMR + teh$nontebp + teh$b73bp)
+recent=lm(teh$GY~teh$recentInsertion + teh$olderInsertion + teh$nontebp + teh$b73bp)
+
+gs=lm(GY~genomesize+b73bp, data=teh)
+
+
+AIC(gs,tebp,genic,umr,recent) %>% arrange(AIC)
+sapply(list(gs,tebp,genic,umr,recent), function(x) summary(x)$adj.r.squared)
+
+
+models=list(gs, tebp, genic, umr, recent) 
+
+models=lapply(models, tidy)
+models[[1]]$name='gs'
+models[[2]]$name='tebp'
+models[[3]]$name='genic'
+models[[4]]$name='umr'
+models[[5]]$name='recent'
+
+
                  
                  
