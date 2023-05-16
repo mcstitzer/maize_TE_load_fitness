@@ -93,3 +93,13 @@ DTSfitb <- relmatLmer(DTS ~ tebp + nontebp + (1|namRIL) ,
                   relmat=list(namRIL=DTSgrm))
                             
 VarProp(DTSfitb)
+
+
+## get variance of tebp explained by kinship!!! plus confidence interval
+TEbpgrm=kinm[rownames(kinm)%in% teh[!is.na(teh$tebp),'namRIL'], colnames(kinm) %in% teh[!is.na(teh$tebp), 'namRIL']]
+kinte=relmatLmer(tebp~(1|namRIL),data=teh[teh$namRIL %in% colnames(TEbpgrm),],
+                 relmat=list(namRIL=TEbpgrm))
+VarProp(kinte)
+prof=profile(kinte)
+prof_prop <- lme4qtl::varpropProf(prof) # convert to proportions
+confint(prof_prop)
