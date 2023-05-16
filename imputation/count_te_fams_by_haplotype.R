@@ -66,10 +66,13 @@ allTE=lapply(genomes, function(genome){
 at=do.call(c, allTE)
 ## need to remove _INT and _LTR from the end
 at$Name=gsub('_LTR', '', gsub('_INT', '', at$Name))
+at$collapsedFam=at$Name
+at$collapsedFam[substr(at$Classification,1,3)=='LTR' & !grepl(':|TE|chr', at$Name)]=str_split_fixed(at$collapsedFam[substr(at$Classification,1,3)=='LTR' & !grepl(':|TE|chr', at$Name)], '_', 2)[,1]
 mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
-
 write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
-             
+mbTEsFam=data.frame(at) %>% group_by(collapsedFam, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
+write.table(mbTEsFam, paste0('TE_content_across_NAM_genotypes_by_collapsedfam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
+  
                 
 ## sups too
  te=at
