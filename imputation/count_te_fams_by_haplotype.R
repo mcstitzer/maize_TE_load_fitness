@@ -71,6 +71,23 @@ at$collapsedFam[substr(at$Classification,1,3)=='LTR' & !grepl(':|TE|chr', at$Nam
 mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
 write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
 mbTEsFam=data.frame(at) %>% group_by(collapsedFam) %>% dplyr::summarize(bp=sum(width)) %>% dplyr::arrange(desc(bp)) %>% data.frame() ## grrr htese superfamily assignements are wrong because of stupid decisions so just drop them... :(
+## got to get rid of duplicated
+mbTEsFam$Classification=at$Classification[match(mbTEsFam$collapsedFam, at$collapsedFam)] ## this will do first one it finds? so okay??
+
+ ## reformat to get superfamily for each TE annotation
+ classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
+ mbTEsFam$sup=str_split_fixed(mbTEsFam$Classification, '/', 2)[,2]
+ mbTEsFam$sup[mbTEsFam$sup=='Gypsy']='RLG'
+ mbTEsFam$sup[mbTEsFam$sup=='Copia']='RLC'
+ mbTEsFam$sup[mbTEsFam$sup=='unknown' & mbTEsFam$Classification=='LTR/unknown']='RLX'
+ mbTEsFam$sup[mbTEsFam$sup=='Helitron']='DHH'
+ mbTEsFam$sup[mbTEsFam$sup=='CRM']='RLG' ## need these and following ones because not structural
+ mbTEsFam$sup[mbTEsFam$sup=='L1']='RIL'
+ mbTEsFam$sup[mbTEsFam$sup=='RTE']='RIT'
+ mbTEsFam$sup[mbTEsFam$sup=='unknown' & mbTEsFam$Classification=='LINE/unknown']='RIX'
+ 
+ mbTEsFam$sup[!mbTEsFam$Classification %in% classificationTE]=NA
+
 write.table(mbTEsFam, paste0('TE_content_across_NAM_genotypes_by_collapsedfam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
   
                 
