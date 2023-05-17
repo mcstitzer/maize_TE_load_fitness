@@ -9,7 +9,7 @@ source('../figures/color_palette.R')
 
 teh=read.table('../models/geno_pheno_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
 
-pahDF=read.table('../models/lm_output_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
+pahDF=read.table('../models/lm_output_gphenos.greaterthan22b73correct.2023-05-16.txt', header=T)
 pahFam=read.table('../models/lm_output_gphenos.namFamily.greaterthan22b73correct.2022-09-15.txt', header=T)
 pahFam$effect=pahFam$gsEffect ## go back and change this in generating file in models dir
 pahFam$subpop=nam$subpop[match(toupper(pahFam$nam), toupper(nam$genome))] ## also go back and do this there
@@ -75,6 +75,24 @@ pht=ggplot(teh, aes(x=tebp/1e6, y=PH, color=subpop)) + geom_point(alpha=0.7) + s
 
 tecontent=plot_grid(dtst, gyrawt, gyt, ncol=3, labels=c('D', 'E', 'F'))
 tecontent2=plot_grid(dtst, gyt, ncol=2, labels='AUTO')
+
+                     
+dtstphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=DTS, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Days to Silking (BLUE, days)')+xlab('Imputed Hybrid TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='DTS']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='DTS'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='DTS'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+gytphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=GY, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')+xlab('Imputed Hybrid TE content (Mbp)')+
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GY']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='GY'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='GY'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+tecontent3=plot_grid(dtstphz51, gytphz51, ncol=2, labels='AUTO')
+
+plot_grid(tecontent3, legend, rel_widths=c(1,0.2))
+
 
 plot_grid(genomesize, tecontent, ncol=1)
 
