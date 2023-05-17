@@ -47,7 +47,15 @@ gs$keep=gs$id %in% sk$V1
 tep=merge(gs[gs$keep,], p[,-c(2:8)], by.x='namRIL', by.y='Geno_Code')
 teh=merge(gs[gs$keep,], h[,-c(1)], by.x='namRIL', by.y='ID')
 
-
+### add in values from phz51 genome
+teh$genomesizePHZ51=teh$genomesize+2202400220                 
+teh$tebpPHZ51=teh$tebp+1952386843
+teh$allknobbpPHZ51=teh$allknobbp +22369776
+teh$centromerebpPHZ51=teh$centromerebp+8822077
+teh$telomerebpPHZ51=teh$telomerebp+1208217
+teh$ribosomalbpPHZ51=teh$ribosomalbp+2210613        
+teh$nontenonrepeatbp=teh$nontebp-teh$allknobbp-teh$centromerebp-teh$telomerebp-teh$ribosomalbp
+teh$nontenonrepeatbpPHZ51=teh$nontenonrepeatbp+215278677
 ## run a ton of linear models, start simple with pheno~geno, no covariates - split out each repeat class
 ## then make another one with each NAM family separately
 
@@ -111,7 +119,7 @@ runAssnP=function(genocol, famSpecific=F){ ## will return df with pheno col (all
 }
 
 ## make a df for all geno x pheno combos!
-pahList=lapply(colnames(gs)[c(2:16,19:(which(colnames(gs)=='namRIL')-1))], function(x) runAssnH(x))
+pahList=lapply(colnames(teh)[c(3:17,20:23, 33:40)], function(x) runAssnH(x))
 pahDF=do.call('rbind', pahList)
 
 ## then repeat for family-specific!
@@ -140,16 +148,7 @@ write.table(teh, paste0('geno_pheno_gphenos.greaterthan',b73CorrectNumber, 'b73c
 write.table(tep, paste0('geno_pheno_mphenos.greaterthan',b73CorrectNumber, 'b73correct.',Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 }
 
-                 
-teh$tebpPHZ51=teh$tebp+1952386843
-teh$allknobbpPHZ51=teh$allknobbp +22369776
-teh$centromerebpPHZ51=teh$centromerebp+8822077
-teh$telomerebpPHZ51=teh$telomerebp+1208217
-teh$ribosomalbpPHZ51=teh$ribosomalbp+2210613
-                 
-teh$nontenonrepeatbp=teh$nontebp-teh$allknobbp-teh$centromerebp-teh$telomerebp-teh$ribosomalbp
-      
-teh$nontenonrepeatbpPHZ51=teh$nontenonrepeatbp+215278677
+
                  
 mDTS=lm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
 mGY=lm(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
