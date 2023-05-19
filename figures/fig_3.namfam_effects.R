@@ -12,7 +12,7 @@ legend=readRDS('subpopulation_legend.RDS')
 
 teh=read.table('../models/geno_pheno_gphenos.greaterthan22b73correct.2022-09-15.txt', header=T)
 
-pahFam=read.table('../models/lm_output_gphenos.namFamily.greaterthan22b73correct.2022-09-15.txt', header=T)
+pahFam=read.table('../models/lm_output_gphenos.namFamily.greaterthan22b73correct.2023-05-19.txt', header=T)
 
 ## we probably want families labeled, at least the sig ones!
 
@@ -30,8 +30,8 @@ pahFam=pahFamOrig
 ## just genome size te and nonte
 pahFam=pahFamOrig[pahFamOrig$geno %in% c('tebp', 'genomesize'),]
 pahFam$label=factor(ifelse(pahFam$geno=='genomesize', 'Genome Size', 'TE Content'), levels=c('TE Content','Genome Size')) ## haah, first one goes at bottom because of 1,2 :)
-dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=gsEffect, y=label, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
-gyEs=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
+dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=gsEffect, y=label, col=subpop,  alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) 
+gyEs=ggplot(pahFam[pahFam$pheno=='GY',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) 
 gyrawEs=ggplot(pahFam[pahFam$pheno=='GYraw',], aes(x=gsEffect, y=label, col=subpop, alpha=ifelse(pval<0.05, 0.9, 0.5), size=r2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY corrected for DTS (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$r2), max(pahFam$r2))) + scale_alpha(range=c(0.5,0.9))
 
 #plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO')
@@ -44,6 +44,26 @@ legend <- get_legend(
 )
 #plot_grid(plot_grid(dtsEs, gyEs, gyrawEs, rel_widths=c(1.25,1, 1), ncol=3, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
 plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+
+
+## lollipop
+pahFam=pahFamOrig
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop, size=r2)) + geom_point() +geom_segment() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+  scale_size_area(max_size=20) + xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8))
+ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, aes(color=ifelse(pval<0.05, 'black', 'gray')), size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
+gylollipop=ggplot(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, color= 'black', size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+ xlim(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='GY' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8)) + ylim(0,0.12)
+
+gylollipop
+
+ggplot(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop, size=r2)) + geom_point() +geom_segment() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on DTS (days)')+  scale_size_area(max_size=20) + xlim(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8))
+ggplot(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, aes(color=ifelse(pval<0.05, 'black', 'gray')), size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on DTS (days)')+ xlim(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8)) 
+dtslollipop=ggplot(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',], aes(x=gsEffect, xend=gsEffect, y=r2, yend=0, col=subpop,fill=subpop))+geom_segment(size=2) + geom_point(pch=21, color= 'black', size=6)   + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ scale_fill_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on DTS (days)')+ xlim(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8, -(min(pahFam[pahFam$pheno=='DTS' & pahFam$geno=='tebpPHZ51',]$gsEffect)-0.5e-8)) 
+dtslollipop
+
+plot_grid(plot_grid(dtslollipop, gylollipop, rel_widths=c(1.25,1), ncol=2, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+
+
+gylollipop+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y')
+dtslollipop+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y')
 
 dev.off()
 
