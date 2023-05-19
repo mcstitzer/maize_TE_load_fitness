@@ -123,7 +123,7 @@ pahList=lapply(colnames(teh)[c(3:17,20:23, 33:40)], function(x) runAssnH(x))
 pahDF=do.call('rbind', pahList)
 
 ## then repeat for family-specific!
-pahFList=lapply(colnames(gs)[c(2:16,19:(which(colnames(gs)=='namRIL')-1))], function(x) runAssnH(x, famSpecific=T))
+pahFList=lapply(colnames(teh)[c(3:17,20:23, 33:40)], function(x) runAssnH(x, famSpecific=T))
 pahFDF=do.call('rbind', pahFList)
 
 write.table(pahDF, paste0('lm_output_gphenos.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
