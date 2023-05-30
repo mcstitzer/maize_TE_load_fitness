@@ -103,3 +103,39 @@ VarProp(kinte)
 prof=profile(kinte)
 prof_prop <- lme4qtl::varpropProf(prof) # convert to proportions
 confint(prof_prop)
+
+
+
+### first model - te vs non te
+GYfit <- relmatLmer(GY ~ tebp + nontebp + (1|namRIL) ,data=teh[teh$namRIL %in% colnames(GYgrm),], relmat=list(namRIL=GYgrm))                  
+VarProp(GYfit) ## prop is h2 of random effect of kinship                  
+
+## next, repeat classes
+GYfitrepeat <- relmatLmer(GY ~ tebp + allknobbp + centromerebp + telomerebp + ribosomalbp +  (1|namRIL) ,data=teh[teh$namRIL %in% colnames(GYgrm),], relmat=list(namRIL=GYgrm))                  
+VarProp(GYfitrepeat) ## prop is h2 of random effect of kinship                  
+
+## next, families 
+fams=read.table('../imputation/TE_content_across_NAM_genotypes_by_collapsedfam.2023-05-16.txt', header=T)
+tehfam=read.table('../imputation/ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+## now have to combine columns by collapsed fam names
+combofams=data.frame(lapply(fams$collapsedFam[fams$bp>10e6], function(x) rowSums(tehfam[grep(x, names(tehfam))])))
+colnames(combofams)=fams$collapsedFam[fams$bp>10e6]
+combofams=combofams[,colSums(combofams!=0)>0]
+combofams=cbind(data.frame(namRIL=tehfam$RIL), combofams)
+tehcombofams=merge(teh, combofams, by.x='id', by.y='namRIL')
+GYfitfams <- relmatLmer(GY ~ . + (1|namRIL) ,data=tehcombofams[tehcombofams$namRIL %in% colnames(GYgrm),c(2,31,33:100)], relmat=list(namRIL=GYgrm))                  
+GYfitfamslm=lm(GY~., data=tehcombofams[tehcombofams$namRIL %in% colnames(GYgrm),c(31,33:222)])
+VarProp(GYfitfams) ## prop is h2 of random effect of kinship                  
+
+## next, recent insertions 
+tec=read.table('../imputation/ril_tecategories_bp.2023-04-10.txt', header=T)
+tehcats=merge(teh, tec, by.x='id', by.y='RIL')
+
+GYfitrecent <- relmatLmer(GY ~ recentInsertion + olderInsertion + (1|namRIL) ,data=tehcats[tehcats$namRIL %in% colnames(GYgrm),], relmat=list(namRIL=GYgrm))                  
+VarProp(GYfitrecent) ## prop is h2 of random effect of kinship                  
+
+GYfitgenic <- relmatLmer(GY ~ ingene + onekb + fivekb + greater + (1|namRIL) ,data=tehcats[tehcats$namRIL %in% colnames(GYgrm),], relmat=list(namRIL=GYgrm))                  
+VarProp(GYfitgenic) ## prop is h2 of random effect of kinship                  
+
+## this has to refit, so takes a while
+anova(GYfitKin, GYfit)
