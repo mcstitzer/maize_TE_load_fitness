@@ -18,19 +18,19 @@ parents=read.table('phg_hapids_parents_dbout.txt', header=T)
 ## this is the values for each haplotype of how many TEs there are
 
 ## this is the values for each haplotype of how many TEs there are
-atorrm=read.table('coregene_distance_bins.txt', header=T, comment.char='')
+atorrm=read.table('coregene_distance_bins.2023-06-30.txt', header=T, comment.char='')
 ## reshape to wid eformat so we only count each hapid once
 atorrm=dcast(atorrm, hapid~genecat)
 atorrm[is.na(atorrm)]=0 ## ncie and this mkes sense because ranges alternate between genic intergenic and 0 and value ingene
 
 ## add columns for umr
-a2=read.table('umr_bins.txt', header=T, comment.char='')
+a2=read.table('umr_bins.2023-06-30.txt', header=T, comment.char='')
 a2=dcast(a2, hapid~umrCountnonzero)
 a2[is.na(a2)]=0 ## ncie and this mkes sense because ranges alternate between genic intergenic and 0 and value ingene
 colnames(a2)[2:3]=c('noUMR', 'hasUMR')
 
 ## add columns for recentinsertions
-a3=read.table('recentinsertion_bins.txt', header=T, comment.char='')
+a3=read.table('recentinsertion_bins.2023-06-30.txt', header=T, comment.char='')
 a3=dcast(a3, hapid~recentinsertion)
 a3[is.na(a3)]=0 ## ncie and this mkes sense because ranges alternate between genic intergenic and 0 and value ingene
 colnames(a3)[2:3]=c('olderInsertion', 'recentInsertion')
