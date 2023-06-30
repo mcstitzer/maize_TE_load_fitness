@@ -157,8 +157,17 @@ te$umr=te$umrCount>0
 
 ## guessing on these column names, but find the youngest insertions
 te$recentinsertion=F
-te$recentinsertion[te$Method=='homology' & te$Identity==1]=T
-te$recentinsertion[te$Method=='structural' & te$sup %in% c('RLC', 'RLX', 'RLG') & te$Identity==1]=T
+
+tel=fread('../genomes_and_annotations/tes/NAM.EDTA2.0.0.MTEC02052020.TElib.contigsizes.txt')
+tel$Name=str_split_fixed(tel$V1,"\\#", 2)[,1]
+te$consLen=tel$V2[match(te$Name, tel$Name)]
+te$consProp=width(te)/te$consLen
+
+
+te$recentinsertion[te$Method=='homology' & te$Identity==1 & te$Classification!='Simple_repeat' & width(te)>500]=T
+te$recentinsertion[te$Method=='structural' & te$sup %in% c('RLC', 'RLX', 'RLG') & te$Identity==1& width(te)>500]=T
+
+                
 
                 
 #supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
@@ -272,7 +281,7 @@ return(coredist)
 
 hapdec=do.call(rbind, genedist)
                 
-write.table(hapdec, 'coregene_distance_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
+write.table(hapdec, paste0('coregene_distance_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
                 
 umr=lapply(genomes, function(genome){
    
@@ -292,7 +301,7 @@ return(umrCountnonzero)
 hapumr=do.call(rbind, umr)
                 
                 
-write.table(hapumr, 'umr_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
+write.table(hapumr, paste0('umr_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
                 
                 
                 
@@ -315,4 +324,4 @@ return(recentinsertion)
 haprecent=do.call(rbind, recent)
                 
                 
-write.table(haprecent, 'recentinsertion_bins.txt', quote=F, row.names=F, col.names=T, sep='\t')
+write.table(haprecent, paste0('recentinsertion_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
