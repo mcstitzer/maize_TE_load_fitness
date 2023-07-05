@@ -177,69 +177,74 @@ mGYnPHZ51=lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ
                  
 summary(mDTSnPHZ51)
 summary(mGYnPHZ51)
-                 
-library(rstanarm)
 
-model <- stan_glm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh, refresh = 0)
-sjstats::r2(model)
-model <- stan_lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51 + (1|nam), data=teh, refresh = 0)
-
-sjstats::r2(model)
+### MAKE A TABLE FOR THE PAPER!!!!!
+library(modelsummary)
+modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = 'conf.int')
 
                  
-pdf('~/transfer/full_bayes.pdf', 14,8)
-result=estimate_density(model)
+# library(rstanarm)
 
-plot(result)
-plot(result, stack=F)
-plot(result, stack=F, priors=T)
-result=describe_posterior(model)
-plot(result)
+# model <- stan_glm(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh, refresh = 0)
+# sjstats::r2(model)
+# model <- stan_lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51 + (1|nam), data=teh, refresh = 0)
 
-result=p_direction(model)
-plot(result)                 
-dev.off()
+# sjstats::r2(model)
+
+                 
+# pdf('~/transfer/full_bayes.pdf', 14,8)
+# result=estimate_density(model)
+
+# plot(result)
+# plot(result, stack=F)
+# plot(result, stack=F, priors=T)
+# result=describe_posterior(model)
+# plot(result)
+
+# result=p_direction(model)
+# plot(result)                 
+# dev.off()
                  
                  
-library(texreg) ## stargazer and this can't do scinot, so thin kthis through later
-mDTS=lm(DTS~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
-mGY=lm(GY~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
+# library(texreg) ## stargazer and this can't do scinot, so thin kthis through later
+# mDTS=lm(DTS~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
+# mGY=lm(GY~tebp+allknobbp+centromerebp+telomerebp+ribosomalbp, data=teh)
                  
-texreg(list(mDTS, mGY), digits=10)
+# texreg(list(mDTS, mGY), digits=10)
                  
                  
                
                  
                  
-## partial r2
+# ## partial r2
                  
-library(rsq)
-summary(mGY)
-rsq.partial(mGY)        
+# library(rsq)
+# summary(mGY)
+# rsq.partial(mGY)        
 
                  
                  
                  
-tebp=lm(teh$GY~teh$tebp + teh$nontebp + teh$b73bp)
-genic=lm(teh$GY~teh$ingene + teh$onekb + teh$fivekb + teh$greater + teh$nontebp + teh$b73bp)
-umr=lm(teh$GY~teh$hasUMR + teh$noUMR + teh$nontebp + teh$b73bp)
-recent=lm(teh$GY~teh$recentInsertion + teh$olderInsertion + teh$nontebp + teh$b73bp)
+# tebp=lm(teh$GY~teh$tebp + teh$nontebp + teh$b73bp)
+# genic=lm(teh$GY~teh$ingene + teh$onekb + teh$fivekb + teh$greater + teh$nontebp + teh$b73bp)
+# umr=lm(teh$GY~teh$hasUMR + teh$noUMR + teh$nontebp + teh$b73bp)
+# recent=lm(teh$GY~teh$recentInsertion + teh$olderInsertion + teh$nontebp + teh$b73bp)
 
-gs=lm(GY~genomesize+b73bp, data=teh)
-
-
-AIC(gs,tebp,genic,umr,recent) %>% arrange(AIC)
-sapply(list(gs,tebp,genic,umr,recent), function(x) summary(x)$adj.r.squared)
+# gs=lm(GY~genomesize+b73bp, data=teh)
 
 
-models=list(gs, tebp, genic, umr, recent) 
+# AIC(gs,tebp,genic,umr,recent) %>% arrange(AIC)
+# sapply(list(gs,tebp,genic,umr,recent), function(x) summary(x)$adj.r.squared)
 
-models=lapply(models, tidy)
-models[[1]]$name='gs'
-models[[2]]$name='tebp'
-models[[3]]$name='genic'
-models[[4]]$name='umr'
-models[[5]]$name='recent'
+
+# models=list(gs, tebp, genic, umr, recent) 
+
+# models=lapply(models, tidy)
+# models[[1]]$name='gs'
+# models[[2]]$name='tebp'
+# models[[3]]$name='genic'
+# models[[4]]$name='umr'
+# models[[5]]$name='recent'
 
 
                  
