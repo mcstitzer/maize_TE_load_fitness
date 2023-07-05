@@ -37,7 +37,7 @@ library(data.table)
 b=fread('../../merritt_anchorwave/5_Buckler-PHZ51_mecatErrorCorrected.contigs.fasta.out', header=F, skip=3, fill=T)
 
 b$recentinsertion=F
-b$recentinsertion[b$V2==0]=T
+b$recentinsertion[b$V2==0 & (b$end-b$start)>500]=T
 
 sum(width(a)[b$recentinsertion]) ## 2949663
 
@@ -45,7 +45,7 @@ sum(width(a)[b$recentinsertion]) ## 2949663
 
 ## distance to gene
 
-g=import.gff3('../../merritt_anchorwave/5_Buckler-PHZ51_mecatErrorCorrected.final_annotation.ARCADIO.gff')
+g=import.gff3('../genomes_and_annotations/5_Buckler-PHZ51_mecatErrorCorrected.contigs.liftoff.gff3')
 
 
 
