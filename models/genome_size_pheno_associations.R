@@ -27,6 +27,9 @@ hp$ID=str_split_fixed(rownames(hp), '/', 2)[,1] ## pull off the PHZ51 tester
 ## guillaume did two grain yield blues - one adjusted by flowering time (I'm calling GY), and another with the raw values (I'm calling GYraw)
 h$GYraw=hp$GY[match(h$ID, hp$ID)] ## 
 
+## get back to mean from Guillaume's paper: subtract 16.29 from GY values
+h$GYgr=h$GY-16.29
+
 #gs=read.table('../imputation/ril_bp_repeats.noB73filter.2022-08-31.txt', header=T, comment.char='')
 
 for(b73CorrectNumber in c(0,5,10,20,22,37)){
@@ -158,7 +161,7 @@ summary(mGY)
                  
                
 mDTSPHZ51=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp, data=teh)
-mGYPHZ51=lm(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp, data=teh)
+mGYPHZ51=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp, data=teh)
                  
 summary(mDTSPHZ51)
 summary(mGYPHZ51)
@@ -182,6 +185,41 @@ summary(mGYnPHZ51)
 library(modelsummary)
 modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = 'conf.int')
 
+
+## nam family specific
+library(broom)
+    tmpList=lapply(unique(teh$nam), function(nam){ ## for each nam
+      phenos=c('DTS', 'PH', 'GY', 'GYraw', 'GYgr')
+      pahlist=lapply(phenos, function(pheno){ ## for each pheno
+        if(sum(!is.na(teh[teh$nam==nam,pheno]))>0){
+          tempdata=teh[teh$nam==nam,]
+          tempdata$pheno=tempdata[,pheno]
+          model=lm(pheno~tebpPHZ51 + allknobbpPHZ51 + centromerebpPHZ51 + telomerebpPHZ51 + ribosomalbpPHZ51 + nontenonrepeatbpPHZ51, data=tempdata)                
+    
+          pah=tidy(model) 
+          pah$nam=nam
+          pah$pheno=pheno
+          pah$modelp=glance(model)$p.value 
+          pah$modelR2=glance(model)$r.squared          
+        }
+        return(pah)
+       })
+       return(do.call('rbind', pahlist))
+       })
+       
+
+
+pahFDF=do.call('rbind', tmpList)
+write.table(pahFDF, paste0('lm_output_gphenos.namFamily.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+
+
+## superfamily splilt for supplement
+
+mDTSsup=lm(DTS~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
+mGYsup=lm(GYgr~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
+modelsummary(list("DTS"=mDTSsup, "GY"=mGYsup),  output='~/transfer/supsupp_te_model_table.tex', fmt=f, stars=T, statistic = 'conf.int')
+
+                 
                  
 # library(rstanarm)
 
