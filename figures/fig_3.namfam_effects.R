@@ -17,7 +17,7 @@ pahFam=read.table('../models/lm_output_gphenos.namFamily.greaterthan22b73correct
 ## we probably want families labeled, at least the sig ones!
 
 pahFam$sigLabels=pahFam$nam
-pahFam$sigLabels[pahFam$pval>=0.05]=''
+pahFam$sigLabels[pahFam$p.value>=0.05]=''
 
 pahFam$subpop=nam$subpop[match(pahFam$nam, nam$genome)]
 
@@ -25,6 +25,49 @@ pahFam$subpop=nam$subpop[match(pahFam$nam, nam$genome)]
 pahFamOrig=pahFam
 
 
+
+pdf(paste0('~/transfer/fig3_phenoeffects.', Sys.Date(), '.pdf'), 13,3)
+pahFam=pahFamOrig
+## just genome size te and nonte
+pahFam=pahFamOrig[pahFamOrig$term %in% c('tebpPHZ51'),]
+pahFam$label='TE Content' ## haah, first one goes at bottom because of 1,2 :)
+dtsRange=c(max(abs(pahFam$estimate[pahFam$pheno=='DTS'])))
+gygrRange=c(max(abs(pahFam$estimate[pahFam$pheno=='GYgr'])))
+
+dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=estimate, y=label, col=subpop,  alpha=ifelse(p.value<0.05, 0.9, 0.5), size=modelR2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) + xlim(-dtsRange,dtsRange)
+gyEs=ggplot(pahFam[pahFam$pheno=='GYgr',], aes(x=estimate, y=label, col=subpop, alpha=ifelse(p.value<0.05, 0.9, 0.5), size=modelR2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) + xlim(-gygrRange,gygrRange) 
+plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO')
+legend <- get_legend(
+  # create some space to the left of the legend
+  ## also the nampal is subset 2:5 because we don't want NA, and we also don't have a popcorn in this data!!!!
+  ggplot(pahFam[pahFam$pheno %in% c('DTS', 'GYgr'),], aes(x=estimate, y=term, col=subpop,  alpha=ifelse(p.value<0.05, 0.9, 0.3), size=modelR2)) + geom_point() + scale_color_manual(values=nampal[2:5], na.translate=F)+ theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) +scale_size_area(max_size=20)
+ + theme(legend.box.margin = margin(0, 0, 0, 30)) + guides( alpha='none',  color= guide_legend(order = 1), size=guide_legend(order=2)) + labs(color='Subpopulation', size='R2')
+)
+plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+
+
+
+pahFam=pahFamOrig[pahFamOrig$term %in% c('tebpPHZ51', 'allknobbpPHZ51', 'centromerebpPHZ51', 'telomerebpPHZ51', 'ribosomalbpPHZ51', 'nontenonrepeatPHZ51'),]
+pahFam$label=factor(pahFam$term) ## haah, first one goes at bottom because of 1,2 :)
+dtsEs=ggplot(pahFam[pahFam$pheno=='DTS',], aes(x=estimate, y=label, col=subpop,  alpha=ifelse(p.value<0.05, 0.9, 0.5), size=modelR2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal) + theme(legend.position='NULL') + ylab('') + xlab('Effect of one bp on DTS (days)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8, box.padding = 0.5, max.overlaps = Inf, show.legend=F, direction='y') + scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) + xlim(-dtsRange,dtsRange)
+gyEs=ggplot(pahFam[pahFam$pheno=='GYgr',], aes(x=estimate, y=label, col=subpop, alpha=ifelse(p.value<0.05, 0.9, 0.5), size=modelR2)) + geom_point() + geom_vline(xintercept=0, color='gray', lty='dashed')+ scale_color_manual(values=nampal)+ theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+geom_label_repel(aes(label=sigLabels), size=3, alpha=0.8,box.padding = 0.5, max.overlaps = Inf,  show.legend=F, direction='y') + theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) + scale_alpha(range=c(0.5,0.9)) +scale_size_area(max_size=20) + xlim(-gygrRange,gygrRange) 
+dtsRange=c(max(abs(pahFam$estimate[pahFam$pheno=='DTS'])))
+gygrRange=c(max(abs(pahFam$estimate[pahFam$pheno=='GYgr'])))
+
+plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO')
+legend <- get_legend(
+  # create some space to the left of the legend
+  ## also the nampal is subset 2:5 because we don't want NA, and we also don't have a popcorn in this data!!!!
+  ggplot(pahFam[pahFam$pheno %in% c('DTS', 'GYgr'),], aes(x=estimate, y=term, col=subpop,  alpha=ifelse(p.value<0.05, 0.9, 0.3), size=modelR2)) + geom_point() + scale_color_manual(values=nampal[2:5], na.translate=F)+ theme(axis.text.y=element_blank())+ scale_size_continuous(limits=c(min(pahFam$modelR2), max(pahFam$modelR2))) +scale_size_area(max_size=20)
+ + theme(legend.box.margin = margin(0, 0, 0, 30)) + guides( alpha='none',  color= guide_legend(order = 1), size=guide_legend(order=2)) + labs(color='Subpopulation', size='R2')
+)
+plot_grid(plot_grid(dtsEs, gyEs, rel_widths=c(1.25,1), ncol=2, labels='AUTO'), legend, ncol=2, rel_widths=c(1,0.15))
+
+dev.off()
+
+
+
+#### old
 pdf(paste0('~/transfer/fig3_phenoeffects.', Sys.Date(), '.pdf'), 13,3)
 pahFam=pahFamOrig
 ## just genome size te and nonte
