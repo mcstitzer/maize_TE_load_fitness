@@ -183,7 +183,7 @@ summary(mGYnPHZ51)
 
 ### MAKE A TABLE FOR THE PAPER!!!!!
 library(modelsummary)
-modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = 'conf.int')
+modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
 
 ## nam family specific
@@ -217,7 +217,49 @@ write.table(pahFDF, paste0('lm_output_gphenos.namFamily.greaterthan',b73CorrectN
 
 mDTSsup=lm(DTS~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
 mGYsup=lm(GYgr~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
-modelsummary(list("DTS"=mDTSsup, "GY"=mGYsup),  output='~/transfer/supsupp_te_model_table.tex', fmt=f, stars=T, statistic = 'conf.int')
+modelsummary(list("DTS"=mDTSsup, "GY"=mGYsup),  output='~/transfer/supsupp_te_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
+
+dtslist=lapply(unique(teh$nam), function(nam){ ## for each nam
+      pheno='DTS'
+        if(sum(!is.na(teh[teh$nam==nam,pheno]))>0){
+          tempdata=teh[teh$nam==nam,]
+          tempdata$pheno=tempdata[,pheno]
+          model=lm(pheno~tebpPHZ51 + allknobbpPHZ51 + centromerebpPHZ51 + telomerebpPHZ51 + ribosomalbpPHZ51 + nontenonrepeatbpPHZ51, data=tempdata)                
+        }
+        return(model)
+       })
+##dput(paste0('DTS_', dput(names(table(pahFDF$nam)))))
+names(dtslist)=c("DTS_B97", "DTS_CML103", "DTS_CML228", "DTS_CML247", "DTS_CML277", 
+"DTS_CML322", "DTS_CML333", "DTS_CML52", "DTS_CML69", "DTS_Il14H", 
+"DTS_Ki11", "DTS_Ki3", "DTS_Ky21", "DTS_M162W", "DTS_M37W", "DTS_Mo18W", 
+"DTS_Ms71", "DTS_NC350", "DTS_NC358", "DTS_Oh43", "DTS_Oh7B", 
+"DTS_P39", "DTS_Tx303", "DTS_Tzi8")
+
+
+gylist=lapply(unique(teh$nam), function(nam){ ## for each nam
+      pheno='GYgr'
+        if(sum(!is.na(teh[teh$nam==nam,pheno]))>0){
+          tempdata=teh[teh$nam==nam,]
+          tempdata$pheno=tempdata[,pheno]
+          model=lm(pheno~tebpPHZ51 + allknobbpPHZ51 + centromerebpPHZ51 + telomerebpPHZ51 + ribosomalbpPHZ51 + nontenonrepeatbpPHZ51, data=tempdata)                
+        }
+        return(model)
+       })
+##dput(paste0('GY_', dput(names(table(pahFDF$nam)))))
+names(gylist)=c("GY_B97", "GY_CML103", "GY_CML228", "GY_CML247", "GY_CML277", 
+"GY_CML322", "GY_CML333", "GY_CML52", "GY_CML69", "GY_Il14H", 
+"GY_Ki11", "GY_Ki3", "GY_Ky21", "GY_M162W", "GY_M37W", "GY_Mo18W", 
+"GY_Ms71", "GY_NC350", "GY_NC358", "GY_Oh43", "GY_Oh7B", "GY_P39", 
+"GY_Tx303", "GY_Tzi8")
+
+                 
+## nam family table for supplement
+modelsummary(dtslist,  
+             output='~/transfer/supsupp_namfam_dts_te_model_table.tex', fmt=f, stars=T, statistic = NULL)
+modelsummary(gylist,  
+             output='~/transfer/supsupp_namfam_gy_te_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
 
                  
                  
