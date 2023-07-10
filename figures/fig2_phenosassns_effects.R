@@ -77,6 +77,18 @@ pht=ggplot(teh, aes(x=tebp/1e6, y=PH, color=subpop)) + geom_point(alpha=0.7) + s
 tecontent=plot_grid(dtst, gyrawt, gyt, ncol=3, labels=c('D', 'E', 'F'))
 tecontent2=plot_grid(dtst, gyt, ncol=2, labels='AUTO')
 
+
+dtsPHZ51=ggplot(teh, aes(x=genomesizePHZ51/1e6, y=DTS, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Days to Silking (BLUE, days)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='DTS']*1e6, digits=2), '\n',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='DTS'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='DTS'], digits=2)), vjust=1, hjust=1, color='#99195E')
+
+gyPHZ51=ggplot(teh, aes(x=genomesizePHZ51/1e6, y=GYgr, color=subpop))+ geom_point(alpha=0.7)  + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none')  + ylab('Grain Yield Adjusted for\nFlowering Time (BLUE, t/ha)') + xlab('Imputed genome size (Mbp)') +
+           annotate("text",  x=Inf, y = Inf, label = paste0(
+#             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='genomesize' & pahDF$pheno=='GY']*1e6, digits=2), '\m',
+             'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='genomesize' & pahDF$pheno=='GY'], digits=2), 
+             '\np = ', signif(pahDF$pval[pahDF$geno=='genomesize' & pahDF$pheno=='GY'], digits=2)), vjust=1, hjust=1, color='#99195E')
                      
 dtstphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=DTS, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Days to Silking (BLUE, days)')+xlab('Imputed Hybrid TE content (Mbp)')+
            annotate("text",  x=Inf, y = Inf, label = paste0(
@@ -84,14 +96,16 @@ dtstphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=DTS, color=subpop)) + geom_point(al
              'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='DTS'], digits=2), 
              '\np = ', signif(pahDF$pval[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='DTS'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-gytphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=GYgr, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield Corrected for\nFlowering Time (BLUE, t/ha)')+xlab('Imputed Hybrid TE content (Mbp)')+
+gytphz51=ggplot(teh, aes(x=tebpPHZ51/1e6, y=GYgr, color=subpop)) + geom_point(alpha=0.7) + stat_smooth(geom='line', lwd=1.5, method='lm', se=F, color='#99195E', alpha=0.8) + scale_color_manual(values=nampal) + theme(legend.position='none') + ylab('Grain Yield Adjusted for\nFlowering Time (BLUE, t/ha)')+xlab('Imputed Hybrid TE content (Mbp)')+
            annotate("text",  x=Inf, y = Inf, label = paste0(
 #             '\u03B2 = ', signif(pahDF$gsEffect[pahDF$geno=='tebp' & pahDF$pheno=='GY']*1e6, digits=2), '\n',
              'R\U00B2 = ', signif(pahDF$r2[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='GY'], digits=2), 
              '\np = ', signif(pahDF$pval[pahDF$geno=='tebpPHZ51' & pahDF$pheno=='GY'], digits=2)), vjust=1, hjust=1, color='#99195E')
 
-tecontent3=plot_grid(dtstphz51, gytphz51, ncol=2, labels='AUTO')
+gs3=plot_grid(dtsPHZ51, gyPHZ51, ncol=2, labels='AUTO')
+plot_grid(gs3, legend, rel_widths=c(1,0.2))
 
+tecontent3=plot_grid(dtstphz51, gytphz51, ncol=2, labels='AUTO')
 plot_grid(tecontent3, legend, rel_widths=c(1,0.2))
 
 
