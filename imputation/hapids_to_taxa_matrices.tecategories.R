@@ -35,6 +35,12 @@ a3=dcast(a3, hapid~recentinsertion)
 a3[is.na(a3)]=0 ## ncie and this mkes sense because ranges alternate between genic intergenic and 0 and value ingene
 colnames(a3)[2:3]=c('olderInsertion', 'recentInsertion')
 
+## add columns for deleterious disasters
+a4=read.table('youngclose_bins.txt', header=T, comment.char='')
+a4=dcast(a4, hapid~young)
+a4[is.na(a4)]=0 
+colnames(a4)[2:3]=c('youngandclose', 'farorold')
+
 
 ## this part takes a long long time (2 hours??) - so it's good i've pulled it out from the below lapply :~)
 matchMatrix=data.frame(lapply(1:ncol(all.haps), function(refrange) match(all.haps[,refrange], atorrm$hapid)))
