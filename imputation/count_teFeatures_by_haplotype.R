@@ -325,3 +325,29 @@ haprecent=do.call(rbind, recent)
                 
                 
 write.table(haprecent, paste0('recentinsertion_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
+
+
+
+#### get deleterious disasters
+te$youngand1kb=te$recentinsertion & te$onekbgene & !is.na(te$onekbgene)
+dds=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+
+      tedec=te[te$genotype==genome,] %>% group_by(youngand1kb) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      dd=data.frame(tedechaps) %>% group_by(hapid, youngand1kb) %>% dplyr::summarize(recentinsertionbp=sum(width))
+
+return(dd)
+}) ## running through here overnight!!!
+
+youngclose=do.call(rbind, dds)
+                
+                
+write.table(youngclose, paste0('youngclose_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
+
+                
