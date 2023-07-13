@@ -45,11 +45,34 @@ sum(width(a)[b$recentinsertion]) ## 2949663
 
 ## distance to gene
 
-g=import.gff3('../genomes_and_annotations/5_Buckler-PHZ51_mecatErrorCorrected.contigs.liftoff.gff3')
+gene=import.gff3('../genomes_and_annotations/5_Buckler-PHZ51_mecatErrorCorrected.contigs.liftoff.gff3')
+fgs=data.frame(fread('../genomes_and_annotations/genes/pan_gene_matrix_v3_cyverse.csv'))
+fgs.genome=fgs[,'B73'][fgs$class=='Core Gene' | fgs$class=='Near-Core Gene']
+nontandemcore=gene[gene$canonical_transcript=='1' & !is.na(gene$canonical_transcript) & gene$ID %in% fgs.genome & !is.na(gene$ID),]
+  ## there are core genes without a model called, so add these
+  coreregions=GRanges(seqnames=str_split_fixed(gsub('gmap_ID=', '',fgs.genome[grepl('gmap', fgs.genome)]), ':', 2)[,1], 
+                      IRanges(start=as.numeric(str_split_fixed(str_split_fixed(gsub('gmap_ID=', '',fgs.genome[grepl('gmap', fgs.genome)]), ':', 2)[,2], "-", 2)[,1]), 
+                              end=as.numeric(str_split_fixed(str_split_fixed(gsub('gmap_ID=', '',fgs.genome[grepl('gmap', fgs.genome)]), ':', 2)[,2], "-", 2)[,2])))
+
+  a$coredist=NA
+a$coredist[queryHits(distanceToNearest(a, c(nontandemcore),ignore.strand=T))]=mcols(distanceToNearest(a, c(nontandemcore), ignore.strand=T))$distance
 
 
+a$ingene=a$coredist==0
+a$onekbgene=a$coredist>0 & a$coredist<1001
+a$fivekbgene=a$coredist>1000 & a$coredist<5001
+a$genecat=ifelse(a$ingene, 'ingene', ifelse(a$onekbgene, 'onekb', ifelse(a$fivekbgene, 'fivekb', 'greater')))
 
+data.frame(a) %>% group_by(genecat) %>% dplyr::summarize(sum(width))
+# 1 fivekb     160430082
+# 2 greater   1652369149
+# 3 ingene      34420637
+# 4 onekb       44668864
+# 5 NA          95232811
 
-
+teha$fivekbPHZ51=teha$fivekb+160430082
+teha$greaterPHZ51=teha$greater+1652369149
+teha$onekbPHZ51=teha$onekb+44668864
+teha$ingenePHZ51=teha$ingene+34420637
 
 
