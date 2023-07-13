@@ -261,7 +261,42 @@ modelsummary(gylist,
              output='~/transfer/supsupp_namfam_gy_te_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
 
-                 
+
+##### gene distance bins
+aa=read.table('../imputation/ril_tecategories_bp.2023-06-30.txt', header=T)
+teha=merge(teh, aa, by.x='id', by.y='RIL')
+
+## these are from imputation/get_phz51_genome_counts.R
+teha$fivekbPHZ51=teha$fivekb+160430082
+teha$greaterPHZ51=teha$greater+1652369149
+teha$onekbPHZ51=teha$onekb+44668864
+teha$ingenePHZ51=teha$ingene+34420637
+
+gygene=lm(teha$GYgr~teha$ingenePHZ51+teha$onekbPHZ51+teha$fivekbPHZ51+teha$greaterPHZ51+teha$b73bp)
+dtsgene=lm(teha$DTS~teha$ingenePHZ51+teha$onekbPHZ51+teha$fivekbPHZ51+teha$greaterPHZ51+teha$b73bp)
+modelsummary(list('GY'=gygene, 'DTS'=dtsgene  ),
+             output='~/transfer/te_distance_model_table.tex', fmt=f, stars=T, statistic = NULL)
+           
+### recent insertions
+## these are from imputation/get_phz51_genome_counts.R
+teha$recentInsertionPHZ51=teha$recentInsertion+988171
+teha$olderInsertionPHZ51=teha$olderInsertion+1986133372
+
+gyage=lm(teha$GYgr~teha$recentInsertionPHZ51+teha$olderInsertionPHZ51+teha$b73bp)
+dtsage=lm(teha$DTS~teha$recentInsertionPHZ51+teha$olderInsertionPHZ51+teha$b73bp)
+modelsummary(list('GY'=gyage, 'DTS'=dtsage  ),
+             output='~/transfer/te_age_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
+
+## methylation - i'm being lazy and not calling phz51 
+gyumr=lm(teha$GYgr~teha$noUMR+teha$hasUMR+teha$b73bp)
+dtsumr=lm(teha$DTS~teha$noUMR+teha$hasUMR+teha$b73bp)
+modelsummary(list('GY'=gyumr, 'DTS'=dtsumr  ),
+             output='~/transfer/te_umr_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
+### model the deleterious disasters
+table(te[te$recentinsertion & te$onekbgene & !is.na(te$onekbgene),]$genotype)
+
                  
 # library(rstanarm)
 
