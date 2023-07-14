@@ -76,4 +76,32 @@ teha$greaterPHZ51=teha$greater+1652369149
 teha$onekbPHZ51=teha$onekb+44668864
 teha$ingenePHZ51=teha$ingene+34420637
 
+## okay, save bp of each TE family
+a$Name=gsub('_LTR', '', gsub('_INT', '', a$Class))
+## oh there are some na's - use the overall mbTEsFam from across NAM
+a$Classification[is.na(a$Classification)]=mbTEsFam$Classification[match(a$collapsedFam[is.na(a$Classification)],mbTEsFam$collapsedFam)]
+## okay whatever I'm not going to be the one to solve this disaster
+## drop all the TEs that are in the pan-Nam library but not in any NAM individual .....
+a$collapsedFam[is.na(a$Classification)]%in%mbTEsFam$collapsedFam
+
+
+a$collapsedFam=a$Name
+a$collapsedFam[substr(a$Classification,1,3)=='LTR' & !is.na(a$Classification) & !grepl(':|TE|chr', a$Name)]=str_split_fixed(a$collapsedFam[substr(a$Classification,1,3)=='LTR' & !is.na(a$Classification) & !grepl(':|TE|chr', a$Name)], '_', 2)[,1]
+
+mbTEsFamPHZ51=data.frame(a) %>% group_by(collapsedFam) %>% dplyr::summarize(bp=sum(width)) %>% dplyr::arrange(desc(bp)) %>% data.frame() ## grrr htese superfamily assignements are wrong because of stupid decisions so just drop them... :(
+mbTEsFamPHZ51$Classification=a$Classification[match(mbTEsFamPHZ51$collapsedFam, a$collapsedFam)] ## this will do first one it finds? so okay??
+ ## reformat to get superfamily for each TE annotation
+ classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
+mbTEsFamPHZ51$sup[!is.na(mbTEsFamPHZ51$Classification)]=str_split_fixed(mbTEsFamPHZ51$Classification[!is.na(mbTEsFamPHZ51$Classification)], '/', 2)[,2] mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='Gypsy']='RLG'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='Copia']='RLC'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='unknown' & mbTEsFamPHZ51$Classification=='LTR/unknown']='RLX'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='Helitron']='DHH'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='CRM']='RLG' ## need these and following ones because not structural
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='L1']='RIL'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='RTE']='RIT'
+ mbTEsFamPHZ51$sup[mbTEsFamPHZ51$sup=='unknown' & mbTEsFamPHZ51$Classification=='LINE/unknown']='RIX'
+  mbTEsFamPHZ51$sup[!mbTEsFamPHZ51$Classification %in% classificationTE]=NA
+
+write.table(mbTEsFamPHZ51, paste0('TE_content_across_PHZ51_by_collapsedfam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
+  
 
