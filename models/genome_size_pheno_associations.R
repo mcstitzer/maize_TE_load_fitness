@@ -296,7 +296,65 @@ modelsummary(list('GY'=gyumr, 'DTS'=dtsumr  ),
 
 ### model the deleterious disasters
 table(te[te$recentinsertion & te$onekbgene & !is.na(te$onekbgene),]$genotype)
+ddis=read.table('ril_tecategories_bp.2023-07-14.txt', header=T)
+teha=merge(teha, ddis[,c('RIL', 'farorold', 'youngandclose')], by.x='id', by.y='RIL')
+gydd=lm(teha$GYgr~teha$farorold+teha$youngandclose+teha$b73bp)
+dtsdd=lm(teha$DTS~teha$farorold+teha$youngandclose+teha$b73bp)
+modelsummary(list('GY'=gydd, 'DTS'=dtsdd  ),
+             output='~/transfer/te_deldis_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
+## te fams
+tefams=read.table('ril_tefamilycounts_1MbFams_bp.txt', header=T)
+tefamsp=merge(tefams, teha, by.x='RIL', by.y='id')
+mbTEsFamPHZ51=read.table('TE_content_across_PHZ51_by_collapsedfam.2023-07-14.txt', header=T)
+tefamsp[,colnames(tefamsp)%in% mbTEsFamPHZ51$collapsedFam]=lapply(colnames(tefamsp)[colnames(tefamsp)%in% mbTEsFamPHZ51$collapsedFam], function(fam){ tefamsp[,fam]+mbTEsFamPHZ51$bp[mbTEsFamPHZ51$collapsedFam==fam]})
+mbTEsFam
+tfm=lm(GYgr~., data=tefamsp[,c('GYgr','b73bp',mbTEsFam$collapsedFam[mbTEsFam$bp>10e6 & substr(mbTEsFam$collapsedFam,1,2)!='TE' & !mbTEsFam$collapsedFam %in% c('knob180', 'TR-1', 'CentC', 'AF013103.1', 'CL569186.1')])])
+tfmdts=lm(DTS~., data=tefamsp[,c('DTS','b73bp',mbTEsFam$collapsedFam[mbTEsFam$bp>10e6 & substr(mbTEsFam$collapsedFam,1,2)!='TE'& !mbTEsFam$collapsedFam %in% c('knob180', 'TR-1', 'CentC', 'AF013103.1', 'CL569186.1')])])
+
+summary(tfm)
+tfm1m=lm(GYgr~., data=tefamsp[,c('GYgr','b73bp',mbTEsFam$collapsedFam[mbTEsFam$bp>1e6 & substr(mbTEsFam$collapsedFam,1,2)!='TE'& !mbTEsFam$collapsedFam %in% c('knob180', 'TR-1', 'CentC', 'AF013103.1', 'CL569186.1')])])
+
+ modelsummary(list('GY'=tfm, 'DTS'=tfmdts  ),
+             output='~/transfer/te_fam_10m_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
+
+source('../figures/color_palette.R')
+library(ggridges)  
+library(broom)
+tfmt=tidy(tfm)
+tfmt$sup=mbTEsFamPHZ51$sup[match(tfmt$term, mbTEsFamPHZ51$collapsedFam)]
+tfmt$sup[tfmt$sup=='Gypsy']='RLG'
+tfmt$sup[tfmt$sup %in% c('RIL', 'RIT', 'RIX')]='nonLTR'
+dd.col=c(dd.col, RIX='#6c4da4', RIL='#6c4da4',nonLTR='#6c4da4', nonsig='gray')
+
+
+
+gygt=tidy(gygene)
+gygt$ylab=c('intercept', 'Load within gene', 'Load 1 kb from gene', 'Load 5 kb from gene', 'Load >5 kb from gene', 'B73bp')
+gyat=tidy(gyage)
+gyat$ylab=c('intercept', 'Load of recent insertions', 'Load of older insertions', 'B73bp')
+gyut=tidy(gyumr)
+gyut$ylab=c('intercept', 'Load of no UMR', 'Load with UMR', 'B73bp')
+
+gylim=max(abs(c(gygt$estimate[-c(1,6)], gyat$estimate[-c(1,4)], gyut$estimate[-c(1,4)])))
+                 
+pdf('~/transfer/fig4_tefams.pdf', 10,5)
+ggplot(tfmt[-c(1:2),], aes(x=estimate, y=sup, fill=sup, color=ifelse(p.value<0.05, sup, 'nonsig'), size=ifelse(p.value<0.05,4,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_jitter(height=0.3, alpha=0.9)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(tfmt$estimate[-1])), max(abs(tfmt$estimate[-1]))) + theme(legend.position='NULL')+ ylab('TE superfamily') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev)
+ggplot(tfmt[-c(1:2),], aes(x=estimate, y=sup, fill=sup, color=sup, size=ifelse(p.value<0.05,4,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_jitter(height=0.3, alpha=0.9)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(tfmt$estimate[-1])), max(abs(tfmt$estimate[-1]))) + theme(legend.position='NULL')+ ylab('TE superfamily') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev)
+tfp=ggplot(tfmt[-c(1:2),], aes(x=estimate, y=sup, fill=sup, color=sup, size=ifelse(p.value<0.05,2,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_jitter(height=0.3, alpha=0.9)       + scale_color_manual(values=dd.col)     + scale_fill_manual(values=dd.col)   +scale_point_color_hue(l = 40)+ xlim(-max(abs(tfmt$estimate[-1])), max(abs(tfmt$estimate[-1]))) + theme(legend.position='NULL')+ ylab('TE superfamily') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev)
+
+
+gdp=ggplot(gygt[-c(1,6),], aes(x=estimate, y=ylab, color=ifelse(p.value<0.05,'black','gray'), size=ifelse(p.value<0.05,2,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_point( alpha=0.9)  + xlim(-max(gylim), max(gylim)) + theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev) + scale_color_manual(values=c(black='black', gray='gray'))
+gap=ggplot(gyat[-c(1,4),], aes(x=estimate, y=ylab, color=ifelse(p.value<0.05,'black','gray'), size=ifelse(p.value<0.05,2,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_point(alpha=0.9)  + xlim(-max(gylim), max(gylim)) + theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev) + scale_color_manual(values=c(black='black', gray='gray'))
+gup=ggplot(gyut[-c(1,4),], aes(x=estimate, y=ylab, color=ifelse(p.value<0.05,'black','gray'), size=ifelse(p.value<0.05,2,1))) + geom_vline(xintercept=0, color='gray', lty='dashed')+ geom_point(alpha=0.9)  + xlim(-max(gylim), max(gylim)) + theme(legend.position='NULL')+ ylab('') + xlab('Effect of one bp on GY (t/ha)')+scale_y_discrete(limits=rev) + scale_color_manual(values=c(black='black', gray='gray'))
+
+threem=plot_grid(gdp, gap, gup, labels='AUTO', ncol=1, align='hv')                 
+plot_grid(threem, tfp, labels=c('', 'D'))
+dev.off()
+
+
+                 
                  
 # library(rstanarm)
 
