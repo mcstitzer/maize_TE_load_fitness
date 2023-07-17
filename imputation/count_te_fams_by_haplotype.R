@@ -205,3 +205,24 @@ print(genome)
 } ## running through here overnight!!!
 
 write.table(a, paste0('allNAM_hapids.FamiliesUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+
+
+
+tefams=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+      tedec=te[te$genotype==genome,] %>% filter(collapsedFam %in% mbTEsFam$collapsedFam[mbTEsFam$bp>1e6]) %>% group_by(collapsedFam) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      coredist=data.frame(tedechaps) %>% group_by(hapid, collapsedFam) %>% dplyr::summarize(collapsedFambp=sum(width))
+
+  
+return(coredist)
+}) ## running through here overnight!!!
+
+haptefams=do.call(rbind, tefams)
+                
+write.table(haptefams, paste0('TEfams_load_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
