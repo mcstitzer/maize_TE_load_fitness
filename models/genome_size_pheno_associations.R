@@ -166,6 +166,37 @@ mGYPHZ51=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ5
 summary(mDTSPHZ51)
 summary(mGYPHZ51)
 
+kin=read.table('../phenotypes/kinship_nam_all_chroms_subset.txt', header=F, skip=3)
+kinm=as.matrix(kin[,-1])
+rownames(kinm)=kin$V1
+colnames(kinm)=kin$V1
+GYgrm=kinm[rownames(kinm)%in% teh[!is.na(teh$GY),'namRIL'], colnames(kinm) %in% teh[!is.na(teh$GY), 'namRIL']]
+
+library(MASS)
+library(vegan)
+#GYgrmPCs=isoMDS(GYgrm, k=3) ## doesbn't worjk because negatives
+GYgrmPCs=vegan::metaMDS(comm=GYgrm, k=3)
+pcs=data.frame(GYgrmPCs$points)
+pcs$namRIL=rownames(pcs)
+GYtehPC=merge(teh, pcs, by='namRIL')
+
+DTSgrm=kinm[rownames(kinm)%in% teh[!is.na(teh$DTS),'namRIL'], colnames(kinm) %in% teh[!is.na(teh$DTS), 'namRIL']]
+DTSgrmPCs=vegan::metaMDS(comm=DTSgrm, k=3)
+pcs=data.frame(DTSgrmPCs$points)
+pcs$namRIL=rownames(pcs)
+DTStehPC=merge(teh, pcs, by='namRIL')
+
+
+## or let Merritt get MDS from tassel
+## give her taxa ids
+write.table(teh[!is.na(teh$GY), 'namRIL'], '~/transfer/GY_taxa.txt', row.names=F, col.names=F, sep='\n', quote=F)
+write.table(teh[!is.na(teh$DTS), 'namRIL'], '~/transfer/DTS_taxa.txt', row.names=F, col.names=F, sep='\n', quote=F)
+
+
+                 
+mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + MDS1 + MDS2 + MDS3, data=DTStehPC)
+mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ MDS1 + MDS2 + MDS3, data=GYtehPC)
+  
                  
                  
 mDTSn=lmer(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
@@ -183,7 +214,7 @@ summary(mGYnPHZ51)
 
 ### MAKE A TABLE FOR THE PAPER!!!!!
 library(modelsummary)
-modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = NULL)
+modelsummary(list("DTS"=mDTSPHZ51pcs, "GY"=mGYPHZ51pcs),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
 
 ## nam family specific
@@ -212,7 +243,32 @@ library(broom)
 pahFDF=do.call('rbind', tmpList)
 write.table(pahFDF, paste0('lm_output_gphenos.namFamily.greaterthan',b73CorrectNumber, 'b73correct.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
 
+## check for p values less than 0 for grain yield - Thank you Guillaume!
+library(metap)
+metap::sumlog(pahFDF[pahFDF$term=='tebpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate<0,]$p.value)
 
+metap::sumlog(pahFDF[pahFDF$term=='tebpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate>0,]$p.value)
+
+metap::sumlog(pahFDF[pahFDF$term=='allknobbpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='allknobbpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='centromerebpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='centromerebpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='telomerebpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='telomerebpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='ribosomalbpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='ribosomalbpPHZ51' & pahFDF$pheno=='GYgr' & pahFDF$estimate<0,]$p.value)
+
+metap::sumlog(pahFDF[pahFDF$term=='allknobbpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='allknobbpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='centromerebpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='centromerebpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='telomerebpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='telomerebpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate<0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='ribosomalbpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate>0,]$p.value)
+metap::sumlog(pahFDF[pahFDF$term=='ribosomalbpPHZ51' & pahFDF$pheno=='DTS' & pahFDF$estimate<0,]$p.value)
+
+                 
+                 
 ## superfamily splilt for supplement
 
 mDTSsup=lm(DTS~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
