@@ -192,25 +192,35 @@ DTStehPC=merge(teh, pcs, by='namRIL')
 write.table(teh[!is.na(teh$GY), 'namRIL'], '~/transfer/GY_taxa.txt', row.names=F, col.names=F, sep='\n', quote=F)
 write.table(teh[!is.na(teh$DTS), 'namRIL'], '~/transfer/DTS_taxa.txt', row.names=F, col.names=F, sep='\n', quote=F)
 
+GYmds=read.table('../imputation/mds_GY1.txt', skip=2, header=T)
+DTSmds=read.table('../imputation/mds_DTS1.txt', skip=2, header=T)
+GYmds$namRIL=gsub('/PHZ51', '', GYmds$Taxa)
+DTSmds$namRIL=gsub('/PHZ51', '', DTSmds$Taxa)
+GYtehPC=merge(teh, GYmds, by='namRIL')
+DTStehPC=merge(teh, DTSmds, by='namRIL')
+
 
                  
-mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + MDS1 + MDS2 + MDS3, data=DTStehPC)
-mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ MDS1 + MDS2 + MDS3, data=GYtehPC)
-  
+#mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + MDS1 + MDS2 + MDS3, data=DTStehPC)
+#mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ MDS1 + MDS2 + MDS3, data=GYtehPC)
+ ## merritts
+mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + PC1 + PC2 + PC3, data=DTStehPC)
+mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ PC1 + PC2 + PC3, data=GYtehPC)
+###           
                  
                  
-mDTSn=lmer(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
-mGYn=lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
+# mDTSn=lmer(DTS~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
+# mGYn=lmer(GY~tebp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + (1|nam), data=teh)
                  
-summary(mDTSn)
-summary(mGYn)
+# summary(mDTSn)
+# summary(mGYn)
                  
                  
-mDTSnPHZ51=lmer(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
-mGYnPHZ51=lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
+# mDTSnPHZ51=lmer(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
+# mGYnPHZ51=lmer(GY~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + (1|nam), data=teh)
                  
-summary(mDTSnPHZ51)
-summary(mGYnPHZ51)
+# summary(mDTSnPHZ51)
+# summary(mGYnPHZ51)
 
 ### MAKE A TABLE FOR THE PAPER!!!!!
 library(modelsummary)
@@ -271,8 +281,12 @@ metap::sumlog(pahFDF[pahFDF$term=='ribosomalbpPHZ51' & pahFDF$pheno=='DTS' & pah
                  
 ## superfamily splilt for supplement
 
-mDTSsup=lm(DTS~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
-mGYsup=lm(GYgr~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp, data=teh)
+
+#GYtehPC=merge(teh, GYmds, by='namRIL')
+#DTStehPC=merge(teh, DTSmds, by='namRIL')
+
+mDTSsup=lm(DTS~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp + PC1 + PC2 + PC3, data=DTStehPC)
+mGYsup=lm(GYgr~dhhbp+dtabp+dtcbp+dthbp+dtmbp+dttbp+rilbp+ritbp+rlcbp+rlgbp+rlxbp+nontenonrepeatbp+allknobbp+centromerebp+telomerebp+ribosomalbp+b73bp+ PC1 + PC2 + PC3, data=GYtehPC)
 modelsummary(list("DTS"=mDTSsup, "GY"=mGYsup),  output='~/transfer/supsupp_te_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
 
@@ -322,14 +336,17 @@ modelsummary(gylist,
 aa=read.table('../imputation/ril_tecategories_bp.2023-06-30.txt', header=T)
 teha=merge(teh, aa, by.x='id', by.y='RIL')
 
+GYtehPCa=merge(teha, GYmds, by='namRIL')
+DTStehPCa=merge(teha, DTSmds, by='namRIL')
+
 ## these are from imputation/get_phz51_genome_counts.R
 teha$fivekbPHZ51=teha$fivekb+160430082
 teha$greaterPHZ51=teha$greater+1652369149
 teha$onekbPHZ51=teha$onekb+44668864
 teha$ingenePHZ51=teha$ingene+34420637
 
-gygene=lm(teha$GYgr~teha$ingenePHZ51+teha$onekbPHZ51+teha$fivekbPHZ51+teha$greaterPHZ51+teha$b73bp)
-dtsgene=lm(teha$DTS~teha$ingenePHZ51+teha$onekbPHZ51+teha$fivekbPHZ51+teha$greaterPHZ51+teha$b73bp)
+gygene=lm(GYgr~ingenePHZ51+onekbPHZ51+fivekbPHZ51+greaterPHZ51+b73bp + PC1 + PC2 + PC3, data=GYtehPCa)
+dtsgene=lm(DTS~ingenePHZ51+onekbPHZ51+fivekbPHZ51+greaterPHZ51+b73bp + PC1 + PC2 + PC3, data=DTStehPCa)
 modelsummary(list('GY'=gygene, 'DTS'=dtsgene  ),
              output='~/transfer/te_distance_model_table.tex', fmt=f, stars=T, statistic = NULL)
            
@@ -338,8 +355,8 @@ modelsummary(list('GY'=gygene, 'DTS'=dtsgene  ),
 teha$recentInsertionPHZ51=teha$recentInsertion+988171
 teha$olderInsertionPHZ51=teha$olderInsertion+1986133372
 
-gyage=lm(teha$GYgr~teha$recentInsertionPHZ51+teha$olderInsertionPHZ51+teha$b73bp)
-dtsage=lm(teha$DTS~teha$recentInsertionPHZ51+teha$olderInsertionPHZ51+teha$b73bp)
+gyage=lm(GYgr~recentInsertionPHZ51+olderInsertionPHZ51+b73bp + PC1 + PC2 + PC3, data=GYtehPCa)
+dtsage=lm(DTS~recentInsertionPHZ51+olderInsertionPHZ51+b73bp + PC1 + PC2 + PC3, data=DTStehPCa)
 modelsummary(list('GY'=gyage, 'DTS'=dtsage  ),
              output='~/transfer/te_age_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
