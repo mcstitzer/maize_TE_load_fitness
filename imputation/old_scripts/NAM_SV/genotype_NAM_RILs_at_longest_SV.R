@@ -22,7 +22,7 @@ ov=findOverlaps(lsvGR, rrGR)
 ##      how many refranges have B73 vs how many have other geno as parent
 
 ## which haps go with which rr's
-atorrm=read.table('../allNAM_hapids.TEbpUpdate.sup.2022-07-12.txt', header=T, comment.char='')
+atorrm=read.table('../allNAM_hapids.TEbpUpdate.sup.2022-08-30.txt', header=T, comment.char='')
 
 
 lsvHaps=cbind(lsv[,c(1,2,3,7,8)][queryHits(ov),], refrange=rr$ref_range_id[subjectHits(ov)])
@@ -30,11 +30,22 @@ lsvHaps$B73HapID=atorrm[atorrm$genotype=='B73',]$hapid[match(lsvHaps$refrange, a
 ### sort of slow but it's okay
 lsvHaps$OtherParentHapID=sapply(1:nrow(lsvHaps), function(x) atorrm$hapid[atorrm$genotype==lsvHaps$genome[x] & atorrm$refrange==lsvHaps$refrange[x]])
 
-atorrm$SVB73genotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$B73HapID) ]
-atorrm$SVOthergenotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$OtherParentHapID) ]
-                                
-b73allele=atorrm %>% group_by(SVB73genotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
-otherallele=atorrm %>% group_by(SVOthergenotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
+## icky this is not working when the same region of the genome is sv across diff nams
+#atorrm$SVB73genotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$B73HapID) ]
+#atorrm$SVOthergenotype=lsvHaps$genome[match(atorrm$hapid, lsvHaps$OtherParentHapID) ]
+                
+lsvHaps$B73TEbp=atorrm$TEbp[match(lsvHaps$B73HapID, atorrm$hapid)]
+lsvHaps$OtherTEbp=atorrm$TEbp[match(lsvHaps$OtherParentHapID, atorrm$hapid)]
+lsvHaps$B73Size=atorrm$hapwidth[match(lsvHaps$B73HapID, atorrm$hapid)]
+lsvHaps$OtherSize=atorrm$hapwidth[match(lsvHaps$OtherParentHapID, atorrm$hapid)]
+     
+SVsummary=lsvHaps %>% group_by(genome) %>% dplyr::summarize(B73TEbp=sum(B73TEbp), OtherTEbp=sum(OtherTEbp, na.rm=T), B73Size=sum(B73Size), OtherSize=sum(OtherSize, na.rm=T))
+          
+## two are bigger
+SVsummary[SVsummary$B73Size>SVsummary$OtherSize,]
+                            
+#b73allele=atorrm %>% group_by(SVB73genotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
+#otherallele=atorrm %>% group_by(SVOthergenotype) %>% dplyr::summarize(TEbp=sum(TEbp), size=sum(hapwidth))                                
   ### Ohno this is not good - there are negative nonTE bp because there are more TEs than bp in the region....
   ### back to the drawing board, recheck imputation again...
                                 

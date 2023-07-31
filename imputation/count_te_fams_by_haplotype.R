@@ -66,12 +66,47 @@ allTE=lapply(genomes, function(genome){
 at=do.call(c, allTE)
 ## need to remove _INT and _LTR from the end
 at$Name=gsub('_LTR', '', gsub('_INT', '', at$Name))
+at$collapsedFam=at$Name
+at$collapsedFam[substr(at$Classification,1,3)=='LTR' & !grepl(':|TE|chr', at$Name)]=str_split_fixed(at$collapsedFam[substr(at$Classification,1,3)=='LTR' & !grepl(':|TE|chr', at$Name)], '_', 2)[,1]
 mbTEs=data.frame(at) %>% group_by(Name, Classification) %>% dplyr::summarize(bp=sum(width)) %>% arrange(desc(bp)) %>% data.frame()
-
 write.table(mbTEs, paste0('TE_content_across_NAM_genotypes_by_fam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
-             
+mbTEsFam=data.frame(at) %>% group_by(collapsedFam) %>% dplyr::summarize(bp=sum(width)) %>% dplyr::arrange(desc(bp)) %>% data.frame() ## grrr htese superfamily assignements are wrong because of stupid decisions so just drop them... :(
+## got to get rid of duplicated
+mbTEsFam$Classification=at$Classification[match(mbTEsFam$collapsedFam, at$collapsedFam)] ## this will do first one it finds? so okay??
+
+ ## reformat to get superfamily for each TE annotation
+ classificationTE=c('DNA/DTA', 'DNA/DTC', 'DNA/DTH', 'DNA/DTM', 'DNA/DTT', 'DNA/Helitron', 'LINE/L1', 'LINE/RTE', 'LINE/unknown', 'LTR/CRM', 'LTR/Copia', 'LTR/Gypsy', 'LTR/unknown', 'MITE/DTA', 'MITE/DTC', 'MITE/DTH', 'MITE/DTM', 'MITE/DTT')
+ mbTEsFam$sup=str_split_fixed(mbTEsFam$Classification, '/', 2)[,2]
+ mbTEsFam$sup[mbTEsFam$sup=='Gypsy']='RLG'
+ mbTEsFam$sup[mbTEsFam$sup=='Copia']='RLC'
+ mbTEsFam$sup[mbTEsFam$sup=='unknown' & mbTEsFam$Classification=='LTR/unknown']='RLX'
+ mbTEsFam$sup[mbTEsFam$sup=='Helitron']='DHH'
+ mbTEsFam$sup[mbTEsFam$sup=='CRM']='RLG' ## need these and following ones because not structural
+ mbTEsFam$sup[mbTEsFam$sup=='L1']='RIL'
+ mbTEsFam$sup[mbTEsFam$sup=='RTE']='RIT'
+ mbTEsFam$sup[mbTEsFam$sup=='unknown' & mbTEsFam$Classification=='LINE/unknown']='RIX'
+ 
+ mbTEsFam$sup[!mbTEsFam$Classification %in% classificationTE]=NA
+
+write.table(mbTEsFam, paste0('TE_content_across_NAM_genotypes_by_collapsedfam.', Sys.Date(), '.txt'), row.names=F, col.names=T, sep='\t', quote=F)
+  
                 
-                
+## sups too
+ te=at
+ te$sup=str_split_fixed(te$Classification, '/', 2)[,2]
+ te$sup[te$sup=='Gypsy']='RLG'
+ te$sup[te$sup=='Copia']='RLC'
+ te$sup[te$sup=='unknown' & te$Classification=='LTR/unknown']='RLX'
+ te$sup[te$sup=='Helitron']='DHH'
+ te$sup[te$sup=='CRM']='RLG' ## need these and following ones because not structural
+ te$sup[te$sup=='L1']='RIL'
+ te$sup[te$sup=='RTE']='RIT'
+ te$sup[te$sup=='unknown' & te$Classification=='LINE/unknown']='RIX'
+ 
+ te$sup[!te$Classification %in% classificationTE]=NA
+supTEs=data.frame(te[te$te,]) %>% group_by(sup) %>% dplyr::summarize(bp=sum(width)) %>% data.frame()
+write.table(supTEs, 'TE_content_across_NAM_genotypes_by_sup.txt', row.names=F, col.names=T, sep='\t', quote=F)
+
 
               
 ## not all things in the TE file are TEs, so set up these categories
@@ -170,3 +205,24 @@ print(genome)
 } ## running through here overnight!!!
 
 write.table(a, paste0('allNAM_hapids.FamiliesUpdate.sup.', Sys.Date(), '.txt'), quote=F, sep='\t', row.names=F, col.names=T)
+
+
+
+tefams=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+      tedec=te[te$genotype==genome,] %>% filter(collapsedFam %in% mbTEsFam$collapsedFam[mbTEsFam$bp>1e6]) %>% group_by(collapsedFam) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      coredist=data.frame(tedechaps) %>% group_by(hapid, collapsedFam) %>% dplyr::summarize(collapsedFambp=sum(width))
+
+  
+return(coredist)
+}) ## running through here overnight!!!
+
+haptefams=do.call(rbind, tefams)
+                
+write.table(haptefams, paste0('TEfams_load_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')

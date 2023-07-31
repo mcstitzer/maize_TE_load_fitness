@@ -15,7 +15,7 @@ source('../figures/color_palette.R')
 namfams=read.table('../figures/nam_fams.txt')
 sk=read.table('../imputation/SampleToKeep.txt')
 
-gs=read.table('../imputation/ril_bp_repeats.2022-07-15.txt', header=T, comment.char='')
+gs=read.table('../imputation/ril_bp_repeats.greaterthan22B73correct.2022-09-15.txt', header=T, comment.char='')
 gs$namRIL=substr(gs$id,1,9)
 gs$namFamily=substr(gs$id,1,4)
 
@@ -34,9 +34,23 @@ gs$foursd=abs(gs$mean-gs$genomesize)/gs$sd >4
 
 gs=gs[!gs$threesd,]
 
+## Track whether there are phenotypes for the individual
+phenos=readRDS('../phenotypes/NAM_H-pheno.rds')
+phenos$genotype=rownames(phenos)
+phenos$ID=str_split_fixed(rownames(phenos), '/', 2)[,1] ## pull off the PHZ51 tester
+
+gs$inYield=gs$namRIL %in% phenos$ID[!is.na(phenos$GY)]
+gs$inFlowering=gs$namRIL %in% phenos$ID[!is.na(phenos$DTS)]
+gs$inBoth=gs$namRIL %in% phenos$ID[!is.na(phenos$GY) & !is.na(phenos$DTS)]
+
+t.test(gs$tebp[gs$inYield], gs$tebp[!gs$inYield])
+t.test(gs$genomesize[gs$inYield], gs$genomesize[!gs$inYield])
+t.test(gs$tebp[gs$inBoth], gs$tebp[!gs$inBoth])
+t.test(gs$genomesize[gs$inBoth], gs$genomesize[!gs$inBoth])
+
 
 ## need to redo this part and it's a pain...
-parents=read.table('../imputation/parent_bp_repeats.2022-08-04.txt', header=T)
+parents=read.table('../imputation/parent_bp_repeatsgreaterthan22B73correct.2022-09-16.txt', header=T)
 parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$id, '_', 2)[,1]), toupper(namfams$V2))]
 parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
 parents$subpop[parents$subpop=='B73']=NA
@@ -58,16 +72,19 @@ famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_ma
                              geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
 #                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
                              geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
-                             ylab('Imputed TE Content (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
+                             ylab('Imputed Haploid TE Content (Mbp)') + xlab('Imputed Haploid Genome Size (Mbp)') +
                              scale_x_continuous(n.breaks=4, limits=GSminmax) +
                              theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='left', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
                              guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
 
                              
-genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Mbp)') + ylab('NAM Family') + 
-                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL')
-tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
+genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid Genome Size (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL') 
+tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid TE Content (Mbp)') + ylab('NAM Family') + 
                 geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+nontebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=nontebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$nontebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid non-TE Genome Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=nontebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$nontebp[-1])])+ theme(legend.position='NULL')
+
 
 legend <- get_legend(famTE)
 
@@ -76,8 +93,131 @@ plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), fam
 
 
 dev.off()
+
+
+
+
+## set up to gray out indivbiduals in nam family that don't have phenoty[pe
+pdf(paste0('~/transfer/fig1_imputation.notphenoed.', Sys.Date(), '.pdf'), 10,9)
+famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
+                             geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
+                             ylab('Imputed Haploid TE Content (Mbp)') + xlab('Imputed Haploid Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='left', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+
+                             
+genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid Genome Size (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL') + xlim(GSminmax)
+tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid TE Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL') + xlim(TEminmax)
+nontebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=nontebp/1e6, color=subpop))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$nontebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid non-TE Genome Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=nontebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$nontebp[-1])])+ theme(legend.position='NULL')
+
+
+legend <- get_legend(famTE)
+
+plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), famTE + theme(legend.position='NULL'), ncol=1,labels=c('','C')), legend, rel_widths=c(1,0.2))
+
+## individuals in yield
+
+nampal=c(nampal, AnoPheno='#787878') ## a so plotted first and thus in background!!!
+gs$subpopYield=sapply(1:nrow(gs), function(x) ifelse(gs$inYield[x], gs$subpop[x], 'AnoPheno'))
+gs$subpopFlowering=sapply(1:nrow(gs), function(x) ifelse(gs$inFlowering[x], gs$subpop[x], 'AnoPheno'))
+gs$subpopBoth=sapply(1:nrow(gs), function(x) ifelse(gs$inBoth[x], gs$subpop[x], 'AnoPheno'))
+##not working to put gray points in back
+famTE=ggplot(gs[gs$inYield,], aes(x=genomesize/1e6, y=tebp/1e6, color=subpopYield))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_point(data=gs[!gs$inYield,]) +
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6, color=subpop), col='black', size=2) +
+                             geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam, color=subpop), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
+                             ylab('Imputed Haploid TE Content (Mbp)') + xlab('Imputed Haploid Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='left', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+
+                             
+genomesize=ggplot(gs[gs$inYield,], aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpopYield))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid Genome Size (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL') + xlim(GSminmax)
+tebp=ggplot(gs[gs$inYield,], aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpopYield))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid TE Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL') + xlim(TEminmax)
+nontebp=ggplot(gs[gs$inYield,], aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=nontebp/1e6, color=subpopYield))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$nontebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid non-TE Genome Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=nontebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$nontebp[-1])])+ theme(legend.position='NULL')
+
+
+#legend <- get_legend(famTE)
+
+plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), famTE + theme(legend.position='NULL'), ncol=1,labels=c('','C')), legend, rel_widths=c(1,0.2))
+
+## individuals in both
+
+famTE=ggplot(gs%>% arrange(subpopBoth), aes(x=genomesize/1e6, y=tebp/1e6, color=subpopBoth))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6, color=subpop), col='black', size=2) +
+                             geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam, color=subpop), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
+                             ylab('Imputed Haploid TE Content (Mbp)') + xlab('Imputed Haploid Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='left', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+
+                             
+genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpopBoth))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid Genome Size (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL')
+tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpopBoth))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid TE Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+nontebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=nontebp/1e6, color=subpopBoth))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$nontebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Haploid non-TE Genome Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=nontebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$nontebp[-1])])+ theme(legend.position='NULL')
+
+
+legend <- get_legend(famTE)
+
+plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), famTE + theme(legend.position='NULL'), ncol=1,labels=c('','C')), legend, rel_widths=c(1,0.2))
+
+
+dev.off()
+
+
+
 saveRDS(legend, 'subpopulation_legend.RDS')
 
+
+gs$sizenam=factor(gs$nam, levels=arrange(parents, parents$genomesize)$nam)
+parents2=arrange(parents[-1,], parents$genomesize[-1])
+parents2$sizenam=factor(parents2$nam, levels=arrange(parents, parents$genomesize)$nam)
+## sort by genome size, plot in line for poster
+pdf('~/transfer/imputation_cshl.pdf', 15,3)
+lineTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~sizenam, strip.position='top', nrow=2) + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
+                             geom_point(data=parents2, aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F, alpha=0.9) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents2, aes(label=sizenam), size=3, alpha=0.9, nudge_y = 100, nudge_x=-200, show.legend=F) + 
+                             ylab('Imputed TE\nContent (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='right', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+lineTE
+dev.off()
 
 ## supplement 1 is validation of genome size vs flow cyt
 ## compare parent imputed length to flow cytometry to pick which is best
@@ -163,18 +303,102 @@ famTE=ggplot(gs, aes(x=genomesize/1e6, y=tebp/1e6, color=subpop, alpha=lsvGeno==
                              guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
 
                              
-#genomesize=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$genomesize[-1])]), x=genomesize/1e6, color=subpop, alpha=lsvGeno=='B73'))  + geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents$genomesize[1])/1e6, lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Mbp)') + ylab('NAM Family') + 
-#                geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=nam, fill=subpop), shape=21, col='black', size=2) + scale_y_discrete(limits=parents$nam[-1][order(parents$genomesize[-1])]) + theme(legend.position='NULL')
-#tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop, alpha=lsvGeno=='B73'))  + geom_jitter(height=0.2) + geom_vline(xintercept=as.numeric(parents$tebp[1])/1e6, lty='dashed', color='black')+ scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
-#                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+b73allele=ggplot(gs[gs$lsvGeno=='B73',], aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point() +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
+                             geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
+                             ylab('Imputed TE Content (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='right', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
+otherallele=ggplot(gs[gs$lsvGeno!='B73',], aes(x=genomesize/1e6, y=tebp/1e6, color=subpop))+ scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F) + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)+ facet_wrap(~nam, strip.position='top') + 
+#                             geom_label(data=parents[1,-which(colnames(parents)=='nam')], aes(label='B73'), alpha=0.8)+ 
+#                             geom_hline(data=parents[1,-which(colnames(parents)=='nam')], aes(yintercept=TEbpFilter/1e9), alpha=0.8, col='black')+ 
+#                             geom_vline(data=parents[1,-which(colnames(parents)=='nam')], aes(xintercept=bpFilter/1e9), alpha=0.8, col='black')+ 
+                             geom_point(alpha=0.5) +
+                             geom_point(data=parents[1,-which(colnames(parents)=='nam')], aes(x=genomesize/1e6, y=tebp/1e6), col='black', size=2) +
+                             geom_point(data=parents[-1,], aes(x=genomesize/1e6, y=tebp/1e6, fill=subpop), shape=21, col='black', size=2, show.legend=F) +
+#                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 0.4, nudge_x=-0.6, show.legend=F) + 
+                             geom_label_repel(data=parents[-1,], aes(label=nam), size=3, alpha=0.8, nudge_y = 1500, nudge_x=-800, show.legend=F) + 
+                             ylab('Imputed TE Content (Mbp)') + xlab('Imputed Genome Size (Mbp)') +
+                             scale_x_continuous(n.breaks=4, limits=GSminmax) +
+                             theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position='right', legend.justification = "center", strip.background = element_blank(),strip.text.x = element_blank())+
+                             guides(colour = guide_legend(ncol = 1)) +scale_y_continuous(n.breaks = 4, limits=TEminmax)
 
-#legend <- get_legend(famTE)
-
-#plot_grid(plot_grid(plot_grid(genomesize, tebp, nrow=1, labels=c('A', 'B')), famTE + theme(legend.position='NULL'), ncol=1,labels=c('','C')), legend, rel_widths=c(1,0.2))
 
 famTE + labs(alpha="B73 allele\nat largest SV")
-
+plot_grid(b73allele, otherallele, ncol=2, labels='AUTO')
+                    
 ggplot(lsvn, aes(x=length, y=NAMcorr, color=subpop, label=genome)) + geom_text() + scale_color_manual(values=nampal[1:5], name='Subpopulation', na.translate=F)
                     
 dev.off()
 
+### explore each family
+                    
+gs=read.table('../imputation/ril_TEFam_bp_repeats.2022-08-12.txt', header=T)
+parents=read.table('parent_TEFam_bp_repeats.2022-11-22.txt', header=T)
+parents=read.table('parent_TEFam_bp_repeats.2022-11-22.txt', header=T)
+source('../figures/color_palette.R')
+namfams=read.table('../figures/nam_fams.txt')
+sk=read.table('../imputation/SampleToKeep.txt')
+parents$nam=namfams$V2[match(toupper(str_split_fixed(parents$RIL, '_', 2)[,1]), toupper(namfams$V2))]
+parents$subpop=nam$subpop[match(toupper(parents$nam), toupper(nam$genome))]
+parents$subpop[parents$subpop=='B73']=NA
+gs$namRIL=substr(gs$RIL, 1,9)
+gs$namFamily=substr(gs$RIL,1,4)
+gs$nam=namfams$V2[match(gs$namFamily, namfams$V1)]
+gs$subpop=nam$subpop[match(toupper(gs$nam), toupper(nam$genome))]
+gs$subpop[gs$subpop=='B73']=NA
+gs$namFamily=substr(gs$RIL,1,4)
+gs$nam=namfams$V2[match(gs$namFamily, namfams$V1)]
+gs$subpop=nam$subpop[match(toupper(gs$nam), toupper(nam$genome))]
+gs$subpop[gs$subpop=='B73']=NA
+gs=gs[gs$RIL %in% sk$V1,]
+
+pdf('~/transfer/fam_imputation_range.pdf',10,8)
+for(fam in colnames(gs)[2:307]){
+minmax=c(min(c(gs[,fam], parents[,fam])), max(c(gs[,fam], parents[,fam])))
+specgs=gs
+specgs$nam=factor(gs$nam, levels=parents$nam[-1][order(parents[-1,fam])])
+print(ggplot(specgs, aes_string(y='nam', x=fam, color='subpop')) +  geom_jitter(height=0.2)+ geom_vline(xintercept=as.numeric(parents[1,fam]), lty='dashed', color='black') + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed Genome Size (Mbp)') + ylab('NAM Family') + geom_point(data=parents[-1,], aes_string(x=fam, y='nam', fill='subpop'), shape=21, col='black', size=2) + theme(legend.position='NULL') + ggtitle(fam))
+}
+dev.off()
+
+pm=cbind(sapply(2:26, function(x) (parents[x,-c(1,308,309)]+parents[1,-c(1,308,309)])/2))
+pmm=cbind(data.frame(id=parents$nam[-1]), t(pm))
+rmm=gs %>% group_by(nam) %>% summarize_at(2:307, mean)
+## scale to b73 value
+scaled_midparentdev=data.frame(sapply(colnames(rmm)[-1], function(x) rmm[,x]-as.numeric(pmm[,x])))/unlist(rmm[1,-1])
+rownames(scaled_midparentdev)=rmm$nam
+                                      
+unscaled_midparentdev=data.frame(sapply(colnames(rmm)[-1], function(x) rmm[,x]-as.numeric(pmm[,x])))
+rownames(unscaled_midparentdev)=rmm$nam
+
+pdf('~/transfer/midparent_copynumber_heatmap.pdf', 30,20)
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=F, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=F, cluster_cols=T, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=F, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(scaled_midparentdev, cluster_rows=T, cluster_cols=T, breaks = seq(-max(abs(scaled_midparentdev)), max(abs(scaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=F, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=F, cluster_cols=T, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=F, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+pheatmap(unscaled_midparentdev, cluster_rows=T, cluster_cols=T, breaks = seq(-max(abs(unscaled_midparentdev)), max(abs(unscaled_midparentdev)), length.out = 100))
+dev.off()
+
+                    
+                    
+                    
+## remove vertical, make rils appear, make parents bigger
+pdf(paste0('~/transfer/jobtalk_rils.pdf'), 12,5)
+tebp=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(height=0.2) + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=3, stroke=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+tebpDOT=ggplot(gs, aes(y=factor(nam, levels=parents$nam[-1][order(parents$tebp[-1])]), x=tebp/1e6, color=subpop))  + geom_jitter(color=NA) + scale_color_manual(values=nampal) + scale_fill_manual(values=nampal, name='Subpopulation', na.translate=F)+ xlab('Imputed TE Content (Mbp)') + ylab('NAM Family') + 
+                geom_point(data=parents[-1,], aes(x=tebp/1e6, y=nam, fill=subpop), shape=21, col='black', size=3, stroke=2)+ scale_y_discrete(limits=parents$nam[-1][order(parents$tebp[-1])])+ theme(legend.position='NULL')
+tebpDOT
+tebp
+dev.off()
