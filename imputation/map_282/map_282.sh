@@ -33,3 +33,27 @@ echo "mapped sequence back to cbsufeschotte2"
 fi
 
 done < 282_fqnames.txt
+
+
+
+### actulaly it's more efficeint to just give each 2 threads, since i was dumb and did the sorting on a single thread - set up this parallel loop using a function
+
+
+
+## then index, and can get samtools indexstats
+for i in *.bam
+do
+samtools index $i
+samtools idxstats $i > ${i%.*}.mapped.txt
+done
+
+
+## also fastqc on all the reads
+ls *.fq.gz | parallel --jobs 50 fastqc {}
+
+
+## then multiqc
+export PYTHONPATH=/programs/multiqc-1.13/lib64/python3.9/site-packages:/programs/multiqc-1.13/lib/python3.9/site-packages
+export PATH=/programs/multiqc-1.13/bin:$PATH
+multiqc .
+
