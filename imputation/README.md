@@ -19,5 +19,9 @@
  - Info on connecting to BRAPI server here [https://bitbucket.org/bucklerlab/rphg/wiki/Home#markdown-header-brapi-access]
 
 
+### Generate PCs for population structure
 
+By Merritt, documented here [https://github.com/merkhaiburch/misc_scripts/blob/master/tassel/MDS_pcs.sh]
+
+Briefly, in TASSEL, subsampled genotypes to 400k random sites per chromosome, merged all chromosomes together, calculated a distance matrix with all the defaults, and calculated MDS's
 
