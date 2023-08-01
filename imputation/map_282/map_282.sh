@@ -61,5 +61,8 @@ ls *.fq.gz | parallel --jobs 50 fastqc {}
 ## then multiqc --- hopefully this knows what to do with samtools indexes too!!!! fingers crossed!
 export PYTHONPATH=/programs/multiqc-1.13/lib64/python3.9/site-packages:/programs/multiqc-1.13/lib/python3.9/site-packages
 export PATH=/programs/multiqc-1.13/bin:$PATH
-multiqc .
+## multiqc needs help finding idxstat files
+mkdir idxstat
+mv *NAMTElib.mapped.txt idxstat/ 
+multiqc . ## for idxstat, will do up to 0.001 of read depth (not all contigs aka TEs)
 
