@@ -37,14 +37,20 @@ done < 282_fqnames.txt
 
 
 ### actulaly it's more efficeint to just give each 2 threads, since i was dumb and did the sorting on a single thread - set up this parallel loop using a function
-
-
+# ---baby's first bash function---
+function map_fq(){ if [ ! -f ${1}.NAMTElib.bam ]; then R1source=/data2/maizediv/illumina/RawSeqData/WGS/Zea/*/data_release/clean_data/${1}_1.clean.fq.gz; R2source=/data2/maizediv/illumina/RawSeqData/WGS/Zea/*/data_release/clean_data/${1}_2.clean.fq.gz; if [ ! -f ${1}.NAMTElib.bam ]; then scp cbsufsrv4:$R1source .; scp cbsufsrv4:$R2source .; R1=${name}_1.clean.fq.gz
+export -f map_fq
+cat 282_fqnames.txt | parallel --progress --jobs 31 map_fq {}
 
 ## then index, and can get samtools indexstats
 for i in *.bam
 do
-samtools index $i
-samtools idxstats $i > ${i%.*}.mapped.txt
+samtools index $i &
+done
+
+for i in *.bam
+do
+samtools idxstats $i > ${i%.*}.mapped.txt &
 done
 
 
@@ -52,7 +58,7 @@ done
 ls *.fq.gz | parallel --jobs 50 fastqc {}
 
 
-## then multiqc
+## then multiqc --- hopefully this knows what to do with samtools indexes too!!!! fingers crossed!
 export PYTHONPATH=/programs/multiqc-1.13/lib64/python3.9/site-packages:/programs/multiqc-1.13/lib/python3.9/site-packages
 export PATH=/programs/multiqc-1.13/bin:$PATH
 multiqc .
