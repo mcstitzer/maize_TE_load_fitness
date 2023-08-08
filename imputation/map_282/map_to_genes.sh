@@ -10,4 +10,4 @@ cat 282_fqnames.txt | parallel --progress --jobs 31 map_fq {}
 
 for i in *B73CDS.bam; do samtools index $i & done
 
-for i in *B73CDS.bam; do samtools stats $i > ${i%.*}.B73genemapped.txt & done
+for i in *B73CDS.bam; do samtools flagstat $i > ${i%.*}.B73geneflagstat.txt & done
