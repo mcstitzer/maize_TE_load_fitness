@@ -24,9 +24,18 @@ m=fread('multiqc_data/mqc_fastqc_sequence_counts_plot_1.txt', header=T)
 al=vector(mode='list', length=nrow(fq))
 names(al)=fq$V1
 
+## okay now get in genes
+#B57_HLC27CCXX_L7.B73CDS.B73geneflagstat.txt
+
+##grep "0 mapped (" *.B73CDS.B73geneflagstat.txt > B73geneflagstat.mapped.txt
+mg=fread('multiqc_data/mqc_fastqc_sequence_counts_plot_1.txt', header=T)
+
+
 for(x in 1:nrow(fq)){
   i=fread(paste0('idxstat/', fq$V1[x], '.NAMTElib.mapped.txt.idxstat.txt'))
   i$prop=i$V3/(2*m$`Unique Reads`[m$Sample==paste0(fq$V1[x], '_1')])
+  i$relProp=i$V3/(2*mg$mapped_passed[gsub('.B73CDS.B73geneflagstat', '', mg$Sample)==fq$V1[x]])
+  ## 
   i$geno=fq$name[x]
   i$sample=fq$V1[x]
   al[[x]]=i
@@ -36,6 +45,11 @@ rp=do.call('rbind', al)
 
 #a=fread('idxstat/Yu796_HLC27CCXX_L5.NAMTElib.mapped.txt.idxstat.txt')
 #a$prop=a$V3/(2* m$`Unique Reads`[m$Sample=='Yu796_HLC27CCXX_L5_1'])
+
+
+
+
+
 
 
 ## milt is negatively assoociated with yield
@@ -166,4 +180,5 @@ b$allte=allte$prop[match(str_split_fixed(b$genotype,'/',2)[,1], allte$GBS)]
 
 
 summary(lm(GY~.,data=b[,-c(1:3)]))
+summary(lm(GY~allte+tester,data=b[,-c(1:3)]))
 
