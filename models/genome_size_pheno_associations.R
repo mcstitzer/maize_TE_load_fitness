@@ -376,6 +376,16 @@ dtsdd=lm(teha$DTS~teha$farorold+teha$youngandclose+teha$b73bp)
 modelsummary(list('GY'=gydd, 'DTS'=dtsdd  ),
              output='~/transfer/te_deldis_model_table.tex', fmt=f, stars=T, statistic = NULL)
 
+### model the age gene cats
+agegene=read.table('ril_tecategories_bp.2023-08-21.txt', header=T)
+teha=merge(teha, agegene[,c('RIL',"old_fivekb", "old_greater", "old_ingene", "old_onekb", "young_fivekb", 
+"young_greater", "young_ingene", "young_onekb")], by.x='id', by.y='RIL')
+gydd=lm(GYgr~old_fivekb+old_greater+old_ingene+old_onekb+young_fivekb+young_greater+young_ingene+young_onekb+b73bp, data=teha)
+dtsdd=lm(DTS~old_fivekb+old_greater+old_ingene+old_onekb+young_fivekb+young_greater+young_ingene+young_onekb+b73bp, data=teha)
+modelsummary(list('GY'=gydd, 'DTS'=dtsdd  ),
+             output='~/transfer/te_agegenedist_model_table.tex', fmt=f, stars=T, statistic = NULL)
+
+                 
 ## te fams
 tefams=read.table('ril_tefamilycounts_1MbFams_bp.txt', header=T)
 tefamsp=merge(tefams, teha, by.x='RIL', by.y='id')
