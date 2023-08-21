@@ -351,3 +351,24 @@ youngclose=do.call(rbind, dds)
 write.table(youngclose, paste0('youngclose_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
 
                 
+#### all pairwise age-genedist combos
+te$agegenecat=paste0(ifelse(te$recentinsertion, 'young', 'old'), '_', te$genecat)
+dds=lapply(genomes, function(genome){
+   
+## get the hapids that come from this genome
+ haps=GRanges(seqnames=paste0('chr', a$chr[a$genotype==genome]), IRanges(start=a$startmin[a$genotype==genome], end=a$endmax[a$genotype==genome]))
+ haps$hapid=a$hapid[a$genotype==genome]
+   ### by "family"
+
+
+      tedec=te[te$genotype==genome,] %>% group_by(agegenecat) %>% reduce_ranges()
+      tedechaps=join_overlap_intersect(tedec, haps)
+      dd=data.frame(tedechaps) %>% group_by(hapid, agegenecat) %>% dplyr::summarize(agegenecatbp=sum(width))
+
+return(dd)
+}) ## running through here overnight!!!
+
+agecats=do.call(rbind, dds)
+                
+                
+write.table(agecats, paste0('agegenedist_bins.', Sys.Date(), '.txt'), quote=F, row.names=F, col.names=T, sep='\t')
