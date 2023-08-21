@@ -41,6 +41,10 @@ a4=dcast(a4, hapid~youngand1kb)
 a4[is.na(a4)]=0 
 colnames(a4)[2:3]=c( 'farorold','youngandclose')
 
+## add column s for agegenedistcats
+a5=read.table('agegenedist_bins.2023-08-21.txt', header=T, comment.char='')
+a5=dcast(a5, hapid~agegenecat)
+a5[is.na(a5)]=0 
 
 
 ## this part takes a long long time (2 hours??) - so it's good i've pulled it out from the below lapply :~)
@@ -52,6 +56,7 @@ colnames(matchMatrix)=colnames(all.haps)
 atorrm=merge(atorrm, a2)
 atorrm=merge(atorrm, a3)
 atorrm=merge(atorrm, a4)
+atorrm=merge(atorrm, a5)
                              
 ## get rid of b73 flavors and bad ranges
 b=read.table('refranges_B73correctlygenotypedAND1Mbrangeremoved.2022-03-22.txt', header=T)
@@ -60,18 +65,18 @@ keepColnames=colnames(all.haps)%in% paste0('X',b$refrange[b$KEEPfinalFilter])
           
           
                             
-tefams=data.frame(RIL=rownames(all.haps))
+tecats=data.frame(RIL=rownames(all.haps))
 
-for(tefam in colnames(atorrm)[2:ncol(atorrm)]){
- tempMat=sapply(1:ncol(all.haps), function(refrange) atorrm[matchMatrix[,refrange],tefam])
+for(tecat in colnames(atorrm)[2:ncol(atorrm)]){
+ tempMat=sapply(1:ncol(all.haps), function(refrange) atorrm[matchMatrix[,refrange],tecat])
  rownames(tempMat)=rownames(all.haps)
  colnames(tempMat)=colnames(all.haps)
- tefams[,tefam]=rowSums(tempMat[,keepColnames], na.rm=T)
+ tecats[,tecat]=rowSums(tempMat[,keepColnames], na.rm=T)
 }
 
                     
 
-write.table(tefams, paste0('ril_tecategories_bp.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
+write.table(tecats, paste0('ril_tecategories_bp.', Sys.Date(), '.txt'), row.names=F, col.names=T, quote=F, sep='\t')
 
 
 ##### actually do for te families
