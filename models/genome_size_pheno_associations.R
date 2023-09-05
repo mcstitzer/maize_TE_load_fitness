@@ -204,8 +204,8 @@ DTStehPC=merge(teh, DTSmds, by='namRIL')
 #mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + MDS1 + MDS2 + MDS3, data=DTStehPC)
 #mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ MDS1 + MDS2 + MDS3, data=GYtehPC)
  ## merritts
-mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp + PC1 + PC2 + PC3, data=DTStehPC)
-mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+b73bp+ PC1 + PC2 + PC3, data=GYtehPC)
+mDTSPHZ51pcs=lm(DTS~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51 + PC1 + PC2 + PC3, data=DTStehPC)
+mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpPHZ51+telomerebpPHZ51+ribosomalbpPHZ51+ PC1 + PC2 + PC3, data=GYtehPC)
 ###           
                  
                  
@@ -224,7 +224,8 @@ mGYPHZ51pcs=lm(GYgr~tebpPHZ51+nontenonrepeatbpPHZ51+allknobbpPHZ51+centromerebpP
 
 ### MAKE A TABLE FOR THE PAPER!!!!!
 library(modelsummary)
-modelsummary(list("DTS"=mDTSPHZ51pcs, "GY"=mGYPHZ51pcs),  output='~/transfer/te_model_table.tex', fmt=f, stars=T, statistic = NULL)
+modelsummary(list("DTS"=mDTSPHZ51pcs, "GY"=mGYPHZ51pcs),  output='~/transfer/te_model_table_pc.tex', fmt=fmt_sci(), stars=T, statistic = NULL, coef_rename=c('tebpPHZ51'='TE bp', 'nontenonrepeatbpPHZ51'='nonTE, nonRepeat bp', 'allknobbpPHZ51'='Knob bp', 'centromerebpPHZ51'='Centromere bp', 'telomerebpPHZ51'='Telomere bp', 'ribosomalbpPHZ51'='Ribosomal bp', 'b73bp'='B73 bp', 'PC1'='PC1', 'PC2'='PC2', 'PC3'='PC3'))
+modelsummary(list("DTS"=mDTSPHZ51, "GY"=mGYPHZ51),  output='~/transfer/te_model_table.tex', fmt=fmt_sci(), stars=T, statistic = NULL, coef_rename=c('tebpPHZ51'='TE bp', 'nontenonrepeatbpPHZ51'='nonTE, nonRepeat bp', 'allknobbpPHZ51'='Knob bp', 'centromerebpPHZ51'='Centromere bp', 'telomerebpPHZ51'='Telomere bp', 'ribosomalbpPHZ51'='Ribosomal bp', 'b73bp'='B73 bp', 'PC1'='PC1', 'PC2'='PC2', 'PC3'='PC3'))
 
 
 ## nam family specific
