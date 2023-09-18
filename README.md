@@ -1,6 +1,10 @@
 # maize_TE_load_fitness
 Do TEs decrease maize fitness?
 
+Code repository for [**Transposable element abundance subtly contributes to lower fitness in maize**]() 2023, Stitzer, Khaipho-Burch, Hudson, Song, Valdez-Franco, Ramstein, Feschotte, Buckler
+
+
+
 1. Download genomes and annotations, in `genomes_and_annotations/`
 2. Download phenotypes, in `phenotypes/`
 3. Count TEs and impute parental genotypes onto RILs using the PHG `imputation/`
